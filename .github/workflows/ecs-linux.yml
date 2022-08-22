@@ -119,7 +119,7 @@ jobs:
 
       - name: Scan Docker Image
         id: image-scan
-        run: bash image_scan.sh $(echo "."$DEPLOY_ACCOUNT"_account")
+        run: bash image_scan.sh $(echo "."$DEPLOY_ACCOUNT"_account") $DEPLOY_SERVICE
         working-directory: deploy/
 
       - name: Sonar Scan
