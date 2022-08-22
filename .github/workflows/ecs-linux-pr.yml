@@ -1,0 +1,107 @@
+name: PR Checks
+on: 
+  workflow_call:
+    inputs:
+      service:
+        required: true
+        type: string
+      account:
+        required: true
+        type: string
+      commit_hash:
+        required: true
+        type: string
+    secrets:
+      aws_key:
+        required: true
+      aws_secret:
+        required: true
+      region:
+        required: true
+      
+
+env: 
+  AWS_ACCESS_KEY_ID: ${{ secrets.aws_key }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret }}
+  AWS_DEFAULT_REGION: ${{ secrets.region }}
+  DEPLOY_SERVICE: ${{ inputs.service }}
+  DEPLOY_ACCOUNT: ${{ inputs.account }}
+  TF_VAR_commit_sha: ${{ inputs.commit_hash }}
+jobs:
+  pr-checks:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
+        with:
+          repository: recipopdev/github-workflows
+          path: github-workflows
+
+      - uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.1.4
+          terraform_wrapper: false
+
+      - name: Copy deployment scripts
+        id: deployment-scripts
+        run: cp github-workflows/scripts/linux/*.sh deploy/
+
+      - name: Fetch & iterate version
+        id: iterate-version
+        run: |
+          bash versioning.sh get_service_version $DEPLOY_SERVICE
+          if [[ $DEPLOY_ACCOUNT == "uat" ]]; then
+            npm version patch
+          fi
+          if [[ $DEPLOY_ACCOUNT == "production" ]]; then
+            npm version minor
+          fi
+        working-directory: deploy/
+
+      - name: Install dependencies
+        id: dependencies
+        run: pip3 install --user Jinja2 PyYAML boto3
+        working-directory: deploy/
+
+      - name: Generate ECR token
+        id: token
+        run: bash authenticate.sh $(echo "."$DEPLOY_ACCOUNT"_account")
+        working-directory: deploy/
+
+      - name: Bootstrap terraform files
+        id: bootstrap
+        run: python3 bootstrap.py;
+        working-directory: deploy/
+
+      - name: Prepare deployment files
+        id: prepare
+        run: |
+          cp ./deploy/*.tf* .
+          cp ./deploy/package.json .
+
+      - name: Terraform fmt
+        id: fmt
+        run: terraform fmt -check -diff
+
+      - name: Terraform Init
+        id: init
+        run: terraform init -input=false
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+
+      - name: Select Workspace
+        id: workspace
+        run: |
+          if [[ $DEPLOY_ACCOUNT == "uat" ]]; then
+            terraform workspace select uat
+          fi
+          if [[ $DEPLOY_ACCOUNT == "production" ]]; then
+            terraform workspace select prod
+          fi
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -input=false
+
