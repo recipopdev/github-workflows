@@ -93,7 +93,7 @@ jobs:
         id: validate
         run: terraform validate -no-color
 
-      - name: Select workspace
+      - name: Select Workspace
         id: workspace
         run: |
           if [[ $DEPLOY_ACCOUNT == "uat" ]]; then
@@ -103,11 +103,11 @@ jobs:
             terraform workspace select prod
           fi
 
-      - name: Production - Terraform Apply
+      - name: Terraform Apply
         id: apply
         run: terraform apply -auto-approve -input=false
 
-      - name: Production - Terraform Confirm
+      - name: Terraform Confirm
         id: confirm
         run: terraform plan -input=false -detailed-exitcode
 
