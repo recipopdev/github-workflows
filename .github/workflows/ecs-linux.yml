@@ -16,6 +16,10 @@ on:
       api_test_env_vars:
         required: true
         type: string
+      database_migration_dockerfile:
+        type: string
+      dotnet_sonar_scan:
+        type: boolean
     secrets:
       aws_key:
         required: true
@@ -37,6 +41,7 @@ env:
   API_TEST_SECRET_VARS: ${{ secrets.api_test_secret_vars }}
   SONAR_SCAN_PATH: ${{ inputs.sonar_scan_path }}
   SONAR_TOKEN: ${{ secrets.sonar_token }}
+  DATBASE_MIGRATION_DOCKERFILE: ${{ inputs.database_migration_dockerfile }}
   TF_VAR_commit_sha: ${{ inputs.commit_hash }}
 jobs:
   deploy-service:
@@ -112,6 +117,19 @@ jobs:
             terraform workspace select prod
           fi
 
+      - name: Run Database Migration
+        if: ${{ inputs.database_migration_dockerfile != '' }}
+        id: database-migration
+        run: |
+          source deploy/switch_role.sh $(echo "."$DEPLOY_ACCOUNT"_account")
+          docker build \
+            --build-arg AWS_REGION=$AWS_DEFAULT_REGION \
+            --build-arg AWS_ACCESS_KEY_ID=$SWITCHED_AWS_ACCESS_KEY_ID \
+            --build-arg AWS_SECRET_ACCESS_KEY=$SWITCHED_AWS_SECRET_ACCESS_KEY \
+            --build-arg AWS_SESSION_TOKEN=$SWITCHED_AWS_SESSION_TOKEN \
+            -f $DATABASE_MIGRATION_DOCKERFILE \
+            .
+
       - name: Terraform Apply
         id: apply
         run: terraform apply -auto-approve -input=false
@@ -125,10 +143,18 @@ jobs:
         run: bash image_scan.sh $(echo "."$DEPLOY_ACCOUNT"_account") $DEPLOY_SERVICE
         working-directory: deploy/
 
-      - name: Sonar Scan
+      - name: Run Sonar Scanner
         if: ${{ inputs.sonar_scan_path != '' }}
         id: sonar-scan
         run: docker run -e SONAR_HOST_URL="https://sonarqube.mgmt.newadimo.co" -e SONAR_LOGIN=$SONAR_TOKEN -v "$(pwd)/"$SONAR_SCAN_PATH":/usr/src" sonarsource/sonar-scanner-cli -Dsonar.projectKey=$DEPLOY_SERVICE
+
+      - name: Run DotNet Sonar Scanner
+        if: ${{ inputs.dotnet_sonar_scan }}
+        id: dotnet-sonar-scan
+        uses: calxus/action-sonarqube-dotnet@1.0.0
+        with:
+          sonarProjectKey: $DEPLOY_SERVICE
+          sonarHostname: "https://sonarqube.mgmt.newadimo.co"
 
       - name: Track deployment rollout
         id: track-rollout
