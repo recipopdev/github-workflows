@@ -136,19 +136,21 @@ jobs:
         working-directory: deploy/
 
       - name: Combining API Test Environment Variables
+        id: combine-api-vars
         run: |
           if [[ $API_TEST_SECRET_VARS != "" ]]; then
-            echo "API_TEST_VARS=$(echo -e "$API_TEST_ENV_VARS\n$API_TEST_SECRET_VARS" | jq -s 'add' --raw-output)" >> $GITHUB_ENV
+            API_TEST_VARS=$(echo -e "$API_TEST_ENV_VARS\n$API_TEST_SECRET_VARS" | jq -s 'add' --raw-output)
           else
-            echo "API_TEST_VARS=$(echo -e "$API_TEST_ENV_VARS")" >> $GITHUB_ENV
+            API_TEST_VARS=$(echo -e "$API_TEST_ENV_VARS")
           fi
+          echo "::set-output name=api-test-vars::$(echo $API_TEST_VARS)\n"
 
       - name: Run API Tests
         id: run-tests
         uses: matt-ball/newman-action@master
         with:
           collection: deploy/tests/tests.json
-          envVar: $API_TEST_VARS
+          envVar: steps.combine-api-vars.outputs.api-test-vars
 
       - name: Commit version
         id: commit-version
