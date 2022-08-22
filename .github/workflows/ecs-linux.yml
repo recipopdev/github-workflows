@@ -123,7 +123,7 @@ jobs:
         working-directory: deploy/
 
       - name: Sonar Scan
-        if: ${{ inputs.sonar_scan_path != "" }}
+        if: ${{ inputs.sonar_scan_path != '' }}
         id: sonar-scan
         run: docker run -e SONAR_HOST_URL="https://sonarqube.mgmt.newadimo.co" -e SONAR_LOGIN=$SONAR_TOKEN -v "$(pwd)/"$SONAR_SCAN_PATH":/usr/src" sonarsource/sonar-scanner-cli -Dsonar.projectKey=$DEPLOY_SERVICE
 
