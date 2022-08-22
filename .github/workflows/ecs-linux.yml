@@ -11,6 +11,8 @@ on:
       commit_hash:
         required: true
         type: string
+      sonar_scan_path:
+        type: string
       api_test_env_vars:
         required: true
         type: string
@@ -21,6 +23,8 @@ on:
         required: true
       region:
         required: true
+      sonar_token:
+      
 
 env: 
   AWS_ACCESS_KEY_ID: ${{ secrets.aws_key }}
@@ -28,6 +32,8 @@ env:
   AWS_DEFAULT_REGION: ${{ secrets.region }}
   DEPLOY_SERVICE: ${{ inputs.service }}
   DEPLOY_ACCOUNT: ${{ inputs.account }}
+  SONAR_SCAN_PATH: ${{ inputs.sonar_scan_path }}
+  SONAR_TOKEN: ${{ secrets.sonar_token }}
   TF_VAR_commit_sha: ${{ inputs.commit_hash }}
 jobs:
   deploy-service:
@@ -115,6 +121,11 @@ jobs:
         id: image-scan
         run: bash image_scan.sh $(echo "."$DEPLOY_ACCOUNT"_account")
         working-directory: deploy/
+
+      - name: Sonar Scan
+        if: ${{ inputs.sonar_scan_path != "" }}
+        id: sonar-scan
+        run: docker run -e SONAR_HOST_URL="https://sonarqube.mgmt.newadimo.co" -e SONAR_LOGIN=$SONAR_TOKEN -v "$(pwd)/"$SONAR_SCAN_PATH":/usr/src" sonarsource/sonar-scanner-cli -Dsonar.projectKey=$DEPLOY_SERVICE
 
       - name: Track deployment rollout
         id: track-rollout
