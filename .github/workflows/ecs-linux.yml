@@ -25,7 +25,7 @@ on:
 env: 
   AWS_ACCESS_KEY_ID: ${{ secrets.aws_key }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret }}
-  AWS_DEFAULT_REGION: ${{ inputs.region }}
+  AWS_DEFAULT_REGION: ${{ secrets.region }}
   DEPLOY_SERVICE: ${{ inputs.service }}
   DEPLOY_ACCOUNT: ${{ inputs.account }}
   TF_VAR_commit_sha: ${{ inputs.commit_hash }}
@@ -52,10 +52,10 @@ jobs:
         id: iterate-version
         run: |
           bash versioning.sh get_service_version $DEPLOY_SERVICE
-          if [[ $DEPLOY_ACCOUNT -eq "uat" ]]; then
+          if [[ "$DEPLOY_ACCOUNT" -eq "uat" ]]; then
             npm version patch
           fi
-          if [[ $DEPLOY_ACCOUNT -eq "production" ]]; then
+          if [[ "$DEPLOY_ACCOUNT" -eq "production" ]]; then
             npm version minor
           fi
         working-directory: deploy/
@@ -96,10 +96,10 @@ jobs:
       - name: Select workspace
         id: workspace
         run: |
-          if [[ $DEPLOY_ACCOUNT -eq "uat" ]]; then
+          if [[ "$DEPLOY_ACCOUNT" -eq "uat" ]]; then
             terraform workspace select uat
           fi
-          if [[ $DEPLOY_ACCOUNT -eq "production" ]]; then
+          if [[ "$DEPLOY_ACCOUNT" -eq "production" ]]; then
             terraform workspace select prod
           fi
 
