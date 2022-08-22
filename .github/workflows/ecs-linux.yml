@@ -111,6 +111,11 @@ jobs:
         id: confirm
         run: terraform plan -input=false -detailed-exitcode
 
+      - name: Scan Docker Image
+        id: image-scan
+        run: bash image_scan.sh $(echo "."$DEPLOY_ACCOUNT"_account")
+        working-directory: deploy/
+
       - name: Track deployment rollout
         id: track-rollout
         run: bash track_deployment.sh $(echo "."$DEPLOY_ACCOUNT"_account") $DEPLOY_SERVICE
