@@ -145,6 +145,12 @@ jobs:
           fi
           echo "::set-output name=api-test-vars::$(echo $API_TEST_VARS)\n"
 
+      - name: Debugging
+        id: debug-vars
+        run: echo $MY_VAR
+        env:
+          MY_VAR: steps.combine-api-vars.outputs.api-test-vars
+
       - name: Run API Tests
         id: run-tests
         uses: matt-ball/newman-action@master
