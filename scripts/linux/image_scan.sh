@@ -7,7 +7,7 @@ export AWS_ACCESS_KEY_ID=$(echo $CREDS | jq .Credentials.AccessKeyId --raw-outpu
 export AWS_SECRET_ACCESS_KEY=$(echo $CREDS | jq .Credentials.SecretAccessKey --raw-output)
 export AWS_SESSION_TOKEN=$(echo $CREDS | jq .Credentials.SessionToken --raw-output)
 
-IMAGE_DIGEST=$(aws ecr describe-images --repository-name $2  --query 'sort_by(imageDetails,& imagePushedAt)[*]' | jq '.[0].imageDigest' --raw-output)
+IMAGE_DIGEST=$(aws ecr describe-images --repository-name $2  --query 'sort_by(imageDetails,& imagePushedAt)[*]' | jq '.[-1].imageDigest' --raw-output)
 
 echo "[+] Starting image scan"
 
