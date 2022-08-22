@@ -24,6 +24,7 @@ on:
       region:
         required: true
       sonar_token:
+      api_test_secret_vars:
       
 
 env: 
@@ -32,6 +33,8 @@ env:
   AWS_DEFAULT_REGION: ${{ secrets.region }}
   DEPLOY_SERVICE: ${{ inputs.service }}
   DEPLOY_ACCOUNT: ${{ inputs.account }}
+  API_TEST_ENV_VARS: ${{ inputs.api_test_env_vars }}
+  API_TEST_SECRET_VARS: ${{ secrets.api_test_secret_vars }}
   SONAR_SCAN_PATH: ${{ inputs.sonar_scan_path }}
   SONAR_TOKEN: ${{ secrets.sonar_token }}
   TF_VAR_commit_sha: ${{ inputs.commit_hash }}
@@ -132,12 +135,20 @@ jobs:
         run: bash track_deployment.sh $(echo "."$DEPLOY_ACCOUNT"_account") $DEPLOY_SERVICE
         working-directory: deploy/
 
+      - name: Combining API Test Environment Variables
+        run: |
+          if [[ $API_TEST_SECRET_VARS != "" ]]; then
+            echo "API_TEST_VARS=$(echo -e "$API_TEST_ENV_VARS\n$API_TEST_SECRET_VARS" | jq -s 'add' --raw-output)" >> $GITHUB_ENV
+          else
+            echo "API_TEST_VARS=$(echo -e "$API_TEST_ENV_VARS")" >> $GITHUB_ENV
+          fi
+
       - name: Run API Tests
         id: run-tests
         uses: matt-ball/newman-action@master
         with:
           collection: deploy/tests/tests.json
-          envVar: ${{ inputs.api_test_env_vars }}
+          envVar: $API_TEST_VARS
 
       - name: Commit version
         id: commit-version
