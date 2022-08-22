@@ -17,13 +17,10 @@ on:
     secrets:
       aws_key:
         required: true
-        type: string
       aws_secret:
         required: true
-        type: string
       region:
         required: true
-        type: string
 
 env: 
   AWS_ACCESS_KEY_ID: ${{ secrets.aws_key }}
