@@ -41,7 +41,7 @@ env:
   API_TEST_SECRET_VARS: ${{ secrets.api_test_secret_vars }}
   SONAR_SCAN_PATH: ${{ inputs.sonar_scan_path }}
   SONAR_TOKEN: ${{ secrets.sonar_token }}
-  DATBASE_MIGRATION_DOCKERFILE: ${{ inputs.database_migration_dockerfile }}
+  DATABASE_MIGRATION_DOCKERFILE: ${{ inputs.database_migration_dockerfile }}
   TF_VAR_commit_sha: ${{ inputs.commit_hash }}
 jobs:
   deploy-service:
@@ -122,7 +122,13 @@ jobs:
         id: database-migration
         run: |
           source deploy/switch_role.sh $(echo "."$DEPLOY_ACCOUNT"_account")
-          docker build --build-arg AWS_REGION=$AWS_DEFAULT_REGION --build-arg AWS_ACCESS_KEY_ID=$SWITCHED_AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY=$SWITCHED_AWS_SECRET_ACCESS_KEY --build-arg AWS_SESSION_TOKEN=$SWITCHED_AWS_SESSION_TOKEN -f $DATABASE_MIGRATION_DOCKERFILE .
+          docker build \
+            --build-arg AWS_REGION=$AWS_DEFAULT_REGION \
+            --build-arg AWS_ACCESS_KEY_ID=$SWITCHED_AWS_ACCESS_KEY_ID \
+            --build-arg AWS_SECRET_ACCESS_KEY=$SWITCHED_AWS_SECRET_ACCESS_KEY \
+            --build-arg AWS_SESSION_TOKEN=$SWITCHED_AWS_SESSION_TOKEN \
+            -f $DATABASE_MIGRATION_DOCKERFILE \
+            .
 
       - name: Terraform Apply
         id: apply
