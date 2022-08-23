@@ -1,0 +1,142 @@
+name: Deploy Service
+on: 
+  workflow_call:
+    inputs:
+      service:
+        required: true
+        type: string
+      account:
+        required: true
+        type: string
+      commit_hash:
+        required: true
+        type: string
+      api_test_env_vars:
+        required: true
+        type: string
+    secrets:
+      aws_key:
+        required: true
+      aws_secret:
+        required: true
+      region:
+        required: true
+      api_test_secret_vars:
+
+env: 
+  AWS_ACCESS_KEY_ID: ${{ secrets.aws_key }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret }}
+  AWS_DEFAULT_REGION: ${{ secrets.region }}
+  DEPLOY_SERVICE: ${{ inputs.service }}
+  DEPLOY_ACCOUNT: ${{ inputs.account }}
+  API_TEST_ENV_VARS: ${{ inputs.api_test_env_vars }}
+  API_TEST_SECRET_VARS: ${{ secrets.api_test_secret_vars }}
+  TF_VAR_commit_sha: ${{ inputs.commit_hash }}
+jobs:
+  deploy-service:
+    runs-on: windows-2019
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.1.4
+          terraform_wrapper: false
+
+      - name: Fetch version
+        id: fetch-version
+        run: |
+          Import-Module .\versioning.ps1
+          Get-ServiceVersion -service $env:DEPLOY_SERVICE
+          if ($env:DEPLOY_ACCOUNT -eq "uat")
+          {
+            npm version patch
+          }
+          if ($env:DEPLOY_ACCOUNT -eq "production")
+          {
+            npm version minor
+          }
+        working-directory: deploy/
+
+      - name: Install dependencies
+        id: dependencies
+        run: pip3 install --user Jinja2 PyYAML boto3
+        working-directory: deploy/
+
+      - name: Generate ECR token
+        id: token
+        run: powershell .\authenticate.ps1 -account $("." + $env:DEPLOY_ACCOUNT + "_account")
+        working-directory: deploy/
+
+      - name: Bootstrap terraform files
+        id: bootstrap
+        run: python3 bootstrap.py;
+        working-directory: deploy/
+
+      - name: Prepare deployment files
+        id: prepare
+        run: |
+          copy .\deploy\*.tf* .
+          copy .\deploy\package.json .
+
+      - name: Terraform fmt
+        id: fmt
+        run: terraform fmt -check -diff
+
+      - name: Terraform Init
+        id: init
+        run: terraform init -input=false
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+
+      - name: Select Workspace
+        id: workspace
+        run: |
+          if ($env:DEPLOY_ACCOUNT -eq "uat")
+          {
+            terraform workspace select uat
+          }
+          if ($env:DEPLOY_ACCOUNT -eq "production")
+          {
+            terraform workspace select prod
+          }
+
+      - name: Terraform Apply
+        id: apply
+        run: terraform apply -auto-approve -input=false
+
+      - name: Terraform Confirm
+        id: confirm
+        run: terraform plan -input=false -detailed-exitcode
+
+      - name: Track deployment rollout
+        id: track-rollout
+        run: powershell .\track_deployment.ps1 -account $("." + $env:DEPLOY_ACCOUNT + "_account") -service $env:DEPLOY_SERVICE
+        working-directory: deploy/
+
+      - name: Combining API Test Environment Variables
+        id: combine-api-vars
+        run: |
+          $API_TEST_VARS=$("$env:API_TEST_ENV_VARS")
+          if ($env:API_TEST_SECRET_VARS -ne "")
+          {
+            $API_TEST_VARS=$("$env:API_TEST_ENV_VARS`r`n$env:API_TEST_SECRET_VARS" | jq -s 'add' --raw-output)
+          }
+          echo "::set-output name=api-test-vars::$($API_TEST_VARS)"
+
+      - name: Run API Tests
+        id: run-tests
+        uses: matt-ball/newman-action@master
+        with:
+          collection: deploy/tests/tests.json
+          envVar: ${{ steps.combine-api-vars.outputs.api-test-vars }}
+
+      - name: Commit version
+        id: commit-version
+        if: ${{ inputs.account != 'development' }}
+        run: |
+          Import-Module .\versioning.ps1
+          Set-ServiceVersion -service $env:DEPLOY_SERVICE
+        working-directory: deploy/
