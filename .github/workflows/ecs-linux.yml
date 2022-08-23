@@ -20,6 +20,8 @@ on:
         type: string
       dotnet_sonar_scan:
         type: boolean
+      self_hosted:
+        type: boolean
     secrets:
       aws_key:
         required: true
@@ -45,7 +47,7 @@ env:
   TF_VAR_commit_sha: ${{ inputs.commit_hash }}
 jobs:
   deploy-service:
-    runs-on: ubuntu-20.04
+    runs-on: ${{ (inputs.self_hosted && 'self-hosted') || 'ubuntu-20.04' }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/checkout@v2
