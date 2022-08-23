@@ -49,6 +49,12 @@ jobs:
   deploy-service:
     runs-on: ${{ (inputs.self_hosted && 'self-hosted') || 'ubuntu-20.04' }}
     steps:
+
+      - name: Preparing working directory on self hosted runner
+        if: ${{ inputs.self_hosted }}
+        id: prep
+        run: sudo chown -R $USER:$USER /home/ubuntu/actions-runner/_work/analytics-api
+
       - uses: actions/checkout@v2
       - uses: actions/checkout@v2
         with:
