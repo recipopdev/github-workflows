@@ -140,6 +140,14 @@ jobs:
       - name: Terraform Apply
         id: apply
         run: terraform apply -auto-approve -input=false
+        
+      - name: Commit version
+        id: commit-version
+        run: |
+          if [[ $DEPLOY_ACCOUNT != "development" ]]; then
+            bash versioning.sh set_service_version $DEPLOY_SERVICE
+          fi
+        working-directory: deploy/
 
       - name: Terraform Confirm
         id: confirm
@@ -187,10 +195,3 @@ jobs:
           collection: deploy/tests/tests.json
           envVar: ${{ steps.combine-api-vars.outputs.api-test-vars }}
 
-      - name: Commit version
-        id: commit-version
-        run: |
-          if [[ $DEPLOY_ACCOUNT != "development" ]]; then
-            bash versioning.sh set_service_version $DEPLOY_SERVICE
-          fi
-        working-directory: deploy/
