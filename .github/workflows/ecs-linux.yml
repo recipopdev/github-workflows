@@ -14,7 +14,6 @@ on:
       sonar_scan_path:
         type: string
       api_test_env_vars:
-        required: true
         type: string
       database_migration_dockerfile:
         type: string
@@ -170,6 +169,7 @@ jobs:
         working-directory: deploy/
 
       - name: Combining API Test Environment Variables
+        if: ${{ inputs.api_test_env_vars != '' }}
         id: combine-api-vars
         run: |
           if [[ $API_TEST_SECRET_VARS != "" ]]; then
@@ -180,6 +180,7 @@ jobs:
           echo "::set-output name=api-test-vars::$(echo $API_TEST_VARS)"
 
       - name: Run API Tests
+        if: ${{ inputs.api_test_env_vars != '' }}
         id: run-tests
         uses: matt-ball/newman-action@master
         with:
