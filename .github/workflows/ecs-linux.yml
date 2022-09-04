@@ -94,6 +94,7 @@ jobs:
         id: prepare
         run: |
           cp ./deploy/*.tf* .
+          cp ./deploy/.npmrc
           if [ -f ./deploy/package.json ]; then
             cp ./deploy/package.json .
           fi
