@@ -4,7 +4,12 @@ get_service_version() {
     export AWS_ACCESS_KEY_ID=$(echo $CREDS | jq .Credentials.AccessKeyId --raw-output)
     export AWS_SECRET_ACCESS_KEY=$(echo $CREDS | jq .Credentials.SecretAccessKey --raw-output)
     export AWS_SESSION_TOKEN=$(echo $CREDS | jq .Credentials.SessionToken --raw-output)
-    jq --null-input --arg name "$1-deployment" --arg version "$(aws ssm get-parameter --name "/ecs/versions/$1" | jq .Parameter.Value --raw-output)" '{"name": $name, "version": $version}' > "package.json"
+    if [ ! -f ../package.json ]; then
+        jq --null-input --arg name "$1-deployment" --arg version "$(aws ssm get-parameter --name "/ecs/versions/$1" | jq .Parameter.Value --raw-output)" '{"name": $name, "version": $version}' > "package.json"
+    else
+        cat ../package.json | jq --arg version "$(aws ssm get-parameter --name "/ecs/versions/$1" | jq .Parameter.Value --raw-output)" > "../package.json"
+    fi
+    
 }
 
 set_service_version() {
