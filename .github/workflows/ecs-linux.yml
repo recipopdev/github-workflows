@@ -73,9 +73,6 @@ jobs:
         id: iterate-version
         run: |
           bash versioning.sh get_service_version $DEPLOY_SERVICE
-          if [ -f ../package.json ]; then
-            cp ../package.json ./deploy/package.json
-          fi
           if [[ $DEPLOY_ACCOUNT == "uat" ]]; then
             npm version patch
           fi
