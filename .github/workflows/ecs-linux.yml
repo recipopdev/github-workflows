@@ -100,7 +100,7 @@ jobs:
         id: prepare
         run: |
           cp ./deploy/*.tf* .
-          cp ./deploy/package.json .
+          cp ./deploy/*.json .
 
       - name: Terraform fmt
         id: fmt
