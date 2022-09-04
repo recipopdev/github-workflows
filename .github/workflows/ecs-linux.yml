@@ -69,10 +69,19 @@ jobs:
         id: deployment-scripts
         run: cp github-workflows/scripts/linux/*.sh deploy/
 
-      - name: Fetch version
-        id: fetch-version
+      - name: Fetch version & iterate version
+        id: iterate-version
         run: |
           bash versioning.sh get_service_version $DEPLOY_SERVICE
+          if [ -f ../package.json ]; then
+            cp ../package.json ./deploy/package.json
+          fi
+          if [[ $DEPLOY_ACCOUNT == "uat" ]]; then
+            npm version patch
+          fi
+          if [[ $DEPLOY_ACCOUNT == "production" ]]; then
+            npm version minor
+          fi
         working-directory: deploy/
 
       - name: Install dependencies
@@ -90,20 +99,11 @@ jobs:
         run: python3 bootstrap.py;
         working-directory: deploy/
 
-      - name: Prepare deployment files & iterate version
+      - name: Prepare deployment files
         id: prepare
         run: |
           cp ./deploy/*.tf* .
-          cp ./deploy/.npmrc .
-          if [ -f ./deploy/package.json ]; then
-            cp ./deploy/package.json .
-          fi
-          if [[ $DEPLOY_ACCOUNT == "uat" ]]; then
-            npm version patch
-          fi
-          if [[ $DEPLOY_ACCOUNT == "production" ]]; then
-            npm version minor
-          fi
+          cp ./deploy/package.json .
 
       - name: Terraform fmt
         id: fmt
