@@ -7,7 +7,7 @@ get_service_version() {
     if [ ! -f ../package.json ]; then
         jq --null-input --arg name "$1-deployment" --arg version "$(aws ssm get-parameter --name "/ecs/versions/$1" | jq .Parameter.Value --raw-output)" '{"name": $name, "version": $version}' > "package.json"
     else
-        cat ../package.json | jq --arg version "$(aws ssm get-parameter --name "/ecs/versions/$1" | jq .Parameter.Value --raw-output)" > "package.json"
+        cat ../package.json | jq --arg version "$(aws ssm get-parameter --name "/ecs/versions/$1" | jq .Parameter.Value --raw-output)" '.version = $version' > "package.json"
     fi
     
 }
