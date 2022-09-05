@@ -98,7 +98,13 @@ DEPLOYMENT_JSON=$(aws ecs describe-services --cluster core-services --services $
 OLD_TASK_DEFINITION=$(echo $DEPLOYMENT_JSON | jq '.[1].taskDefinition' --raw-output)
 DESIRED_COUNT=$(echo $DEPLOYMENT_JSON | jq '.[0].desiredCount' --raw-output)
 
+ACCOUNT_ALIAS=$(aws iam list-account-aliases | jq .AccountAliases[0] --raw-output)
+
 if [[ DESIRED_COUNT -eq 0 ]]; then
+    if [[ $ACCOUNT_ALIAS == "adimo-aws-production" ]]; then
+        echo "[!] Exiting for safety, please contact administrator"
+        exit 1
+    fi
     echo "[!] Scaling service up from 0 to 1"
     aws ecs update-service --cluster core-services --service $2 --desired-count 1 >/dev/null
     echo "[+] Tracking scale up"
