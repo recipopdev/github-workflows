@@ -55,7 +55,7 @@ jobs:
 
       - name: Install dependencies
         id: dependencies
-        run: pip3 install --user Jinja2 PyYAML boto3
+        run: pip3 install --user Jinja2 PyYAML boto3 packaging
         working-directory: deploy/
 
       - name: Fetch version
@@ -70,11 +70,6 @@ jobs:
           {
             npm version minor
           }
-        working-directory: deploy/
-
-      - name: Install dependencies
-        id: dependencies
-        run: pip3 install --user Jinja2 PyYAML boto3
         working-directory: deploy/
 
       - name: Generate ECR token
