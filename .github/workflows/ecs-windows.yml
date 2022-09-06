@@ -61,7 +61,7 @@ jobs:
       - name: Fetch version
         id: fetch-version
         run: |
-          python3 versioning.py --service $DEPLOY_SERVICE --fetch
+          python3 versioning.py --service $env:DEPLOY_SERVICE --fetch
           if ($env:DEPLOY_ACCOUNT -eq "uat")
           {
             npm version patch
@@ -120,7 +120,7 @@ jobs:
         id: commit-version
         if: ${{ inputs.account != 'development' }}
         run: |
-          python3 versioning.py --service $DEPLOY_SERVICE --save
+          python3 versioning.py --service $env:DEPLOY_SERVICE --save
         working-directory: deploy/
 
       - name: Terraform Confirm
