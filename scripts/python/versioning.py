@@ -15,20 +15,20 @@ def retrieve_service_version(service: str):
 def fetch(service: str):
   logging.info("Fetching the version in parameter store for service: " + service)
   if (os.path.isfile("../package.json")):
-    logger.info("package.json already exists in the root directory of this repository, using it instead of creating")
+    logging.info("package.json already exists in the root directory of this repository, using it instead of creating")
     with open("../package.json", "r+") as file:
       package = json.load(file)
       package["version"] = retrieve_service_version(service=service)
       file.seek(0)
       json.dump(package, file, indent=2)
-    logger.info("Successfuly updated package.json")
+    logging.info("Successfuly updated package.json")
   else:
     with open("package.json", "w") as file:
       package = {}
       package["name"] = service
       package["version"] = retrieve_service_version(service=service)
       json.dump(package, file, indent=2)
-    logger.info("Successfuly created package.json")
+    logging.info("Successfuly created package.json")
 
 def save(service: str):
   logging.info("Attempting to save the version in parameter store for service: " + service)
