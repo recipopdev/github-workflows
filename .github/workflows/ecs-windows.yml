@@ -49,13 +49,19 @@ jobs:
 
       - name: Copy deployment scripts
         id: deployment-scripts
-        run: copy github-workflows\scripts\windows\*.ps1 deploy\
+        run: |
+          copy github-workflows\scripts\python\*.py deploy\
+          copy github-workflows\scripts\windows\*.ps1 deploy\
+
+      - name: Install dependencies
+        id: dependencies
+        run: pip3 install --user Jinja2 PyYAML boto3
+        working-directory: deploy/
 
       - name: Fetch version
         id: fetch-version
         run: |
-          Import-Module .\versioning.ps1
-          Get-ServiceVersion -service $env:DEPLOY_SERVICE
+          python3 versioning.py --service $DEPLOY_SERVICE --fetch
           if ($env:DEPLOY_ACCOUNT -eq "uat")
           {
             npm version patch
@@ -115,6 +121,13 @@ jobs:
         id: apply
         run: terraform apply -auto-approve -input=false
 
+      - name: Commit version
+        id: commit-version
+        if: ${{ inputs.account != 'development' }}
+        run: |
+          python3 versioning.py --service $DEPLOY_SERVICE --save
+        working-directory: deploy/
+
       - name: Terraform Confirm
         id: confirm
         run: terraform plan -input=false -detailed-exitcode
@@ -140,11 +153,3 @@ jobs:
         with:
           collection: deploy/tests/tests.json
           envVar: ${{ steps.combine-api-vars.outputs.api-test-vars }}
-
-      - name: Commit version
-        id: commit-version
-        if: ${{ inputs.account != 'development' }}
-        run: |
-          Import-Module .\versioning.ps1
-          Set-ServiceVersion -service $env:DEPLOY_SERVICE
-        working-directory: deploy/

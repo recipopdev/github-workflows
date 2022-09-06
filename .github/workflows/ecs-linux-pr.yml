@@ -46,21 +46,21 @@ jobs:
         id: deployment-scripts
         run: cp github-workflows/scripts/linux/*.sh deploy/
 
+      - name: Install dependencies
+        id: dependencies
+        run: pip3 install --user Jinja2 PyYAML boto3 packaging
+        working-directory: deploy/
+
       - name: Fetch & iterate version
         id: iterate-version
         run: |
-          bash versioning.sh get_service_version $DEPLOY_SERVICE
+          python3 versioning.py --service $DEPLOY_SERVICE --fetch
           if [[ $DEPLOY_ACCOUNT == "uat" ]]; then
             npm version patch
           fi
           if [[ $DEPLOY_ACCOUNT == "production" ]]; then
             npm version minor
           fi
-        working-directory: deploy/
-
-      - name: Install dependencies
-        id: dependencies
-        run: pip3 install --user Jinja2 PyYAML boto3
         working-directory: deploy/
 
       - name: Generate ECR token
