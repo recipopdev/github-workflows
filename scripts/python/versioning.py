@@ -5,6 +5,7 @@ import logging
 import os.path
 import argparse
 import json
+import shutil
 
 def retrieve_service_version(service: str):
   credentials = switch_role(account="management", session_name="IterateVersionSession")
@@ -21,6 +22,7 @@ def fetch(service: str):
       package["version"] = retrieve_service_version(service=service)
       file.seek(0)
       json.dump(package, file, indent=2)
+    shutil.copy("../package.json", "package.json")
     logging.info("Successfuly updated package.json")
   else:
     with open("package.json", "w") as file:
