@@ -8,6 +8,7 @@ def create_tfvars(environment: str):
   credentials = switch_role(account=environment, session_name="IterateVersionSession")
   ecr = get_aws_client("ecr", credentials)
   auth_token = ecr.get_authorization_token(registryIds=[fetch_account_number(environment)])["authorizationData"][0]["authorizationToken"]
+  auth_token = base64.b64decode(auth_token).decode().split(":")[1]
   with open("terraform.tfvars", "w") as file:
     file.write("docker_password = \"" + auth_token + "\"")  
 
