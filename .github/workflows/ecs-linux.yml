@@ -90,7 +90,7 @@ jobs:
 
       - name: Generate ECR token
         id: token
-        run: python3 ecr_authenticate.py --environment $DEPLOY_ACCOUNT
+        run: bash authenticate.sh $(echo "."$DEPLOY_ACCOUNT"_account")
         working-directory: deploy/
 
       - name: Bootstrap terraform files
