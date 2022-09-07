@@ -155,24 +155,6 @@ jobs:
         id: confirm
         run: terraform plan -input=false -detailed-exitcode
 
-      - name: Scan Docker Image
-        id: image-scan
-        run: bash image_scan.sh $(echo "."$DEPLOY_ACCOUNT"_account") $DEPLOY_SERVICE
-        working-directory: deploy/
-
-      - name: Run Sonar Scanner
-        if: ${{ inputs.sonar_scan_path != '' }}
-        id: sonar-scan
-        run: docker run -e SONAR_HOST_URL="https://sonarqube.mgmt.newadimo.co" -e SONAR_LOGIN=$SONAR_TOKEN -v "$(pwd)/"$SONAR_SCAN_PATH":/usr/src" sonarsource/sonar-scanner-cli -Dsonar.projectKey=$DEPLOY_SERVICE
-
-      - name: Run DotNet Sonar Scanner
-        if: ${{ inputs.dotnet_sonar_scan }}
-        id: dotnet-sonar-scan
-        uses: calxus/action-sonarqube-dotnet@1.0.0
-        with:
-          sonarProjectKey: $DEPLOY_SERVICE
-          sonarHostname: "https://sonarqube.mgmt.newadimo.co"
-
       - name: Track deployment rollout
         id: track-rollout
         run: python3 track_deployment.py --service $DEPLOY_SERVICE --environment $DEPLOY_ACCOUNT
