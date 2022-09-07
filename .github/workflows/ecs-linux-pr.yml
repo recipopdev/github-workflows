@@ -44,7 +44,9 @@ jobs:
 
       - name: Copy deployment scripts
         id: deployment-scripts
-        run: cp github-workflows/scripts/linux/*.sh deploy/
+        run: |
+          cp github-workflows/scripts/linux/*.sh deploy/
+          cp github-workflows/scripts/python/*.py deploy/
 
       - name: Install dependencies
         id: dependencies
