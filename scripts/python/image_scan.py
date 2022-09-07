@@ -38,6 +38,7 @@ def image_scan(service:str, environment: str):
       logging.error("Failure scanning image, reason: " + scan_status)
       exit(1)
     i = i + 1
+  logging.info("Image scan complete, results are as follows")
   print_image_scan_findings(ecr=ecr, service=service)
   
 def retrieve_image_scan_status(ecr:boto3.client, service:str) -> str:
@@ -47,6 +48,13 @@ def retrieve_image_scan_status(ecr:boto3.client, service:str) -> str:
     if "status" in image_details[0]["imageScanStatus"]:
       return image_details[0]["imageScanStatus"]["status"]
   return "ERROR"
+
+def print_image_scan_findings(ecr:boto3.client, service:str):
+  image_details = ecr.describe_images(repositoryName=service)["imageDetails"]
+  image_details.sort(key = lambda x:x["imagePushedAt"], reverse=True)
+  if "imageScanFindingsSummary" in image_details[0]:
+    if "findingSeverityCounts" in image_details[0]["imageScanFindingsSummary"]:
+      print(image_details[0]["imageScanFindingsSummary"]["findingSeverityCounts"])
 
 def main():
   parser = argparse.ArgumentParser(description="AWS ECR Authentication Script")

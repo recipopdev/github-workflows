@@ -157,7 +157,7 @@ jobs:
 
       - name: Scan Docker Image
         id: image-scan
-        run: bash image_scan.sh $(echo "."$DEPLOY_ACCOUNT"_account") $DEPLOY_SERVICE
+        run: python3 image_scan.py --environment $DEPLOY_ACCOUNT --service $DEPLOY_SERVICE
         working-directory: deploy/
 
       - name: Run Sonar Scanner
