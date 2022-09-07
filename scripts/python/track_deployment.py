@@ -100,7 +100,7 @@ def parse_service_state(events: dict, success: str) -> bool:
 
 
 def main():
-  parser = argparse.ArgumentParser(description="AWS ECS Service Versioning Script")
+  parser = argparse.ArgumentParser(description="AWS ECS Track Deployment Script")
 
   parser.add_argument("--service", type=str, required=True, help="The name of the service we are interacting with")
   parser.add_argument("--environment", type=str, required=True, help="The name of the environment we are interacting with")
