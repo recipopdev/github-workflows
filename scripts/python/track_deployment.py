@@ -34,7 +34,7 @@ def track_rollout(deployment_id: str, environment: str, service: str) -> bool:
     if (failed_tasks > 0):
       logging.error("Rollout failed due to a failed task, if possible a revert to the last healthy deployment will be attempted")
       return False
-    if (i > 60):
+    if (i > 80):
       logging.error("Timed out waiting for rollout")
       exit(1)
     i = i + 1
