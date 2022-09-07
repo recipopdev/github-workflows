@@ -175,7 +175,7 @@ jobs:
 
       - name: Track deployment rollout
         id: track-rollout
-        run: bash track_deployment.sh $(echo "."$DEPLOY_ACCOUNT"_account") $DEPLOY_SERVICE
+        run: python3 track_deployment.py --service $DEPLOY_SERVICE --environment $DEPLOY_ACCOUNT
         working-directory: deploy/
 
       - name: Combining API Test Environment Variables

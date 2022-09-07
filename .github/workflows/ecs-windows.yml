@@ -129,7 +129,7 @@ jobs:
 
       - name: Track deployment rollout
         id: track-rollout
-        run: powershell .\track_deployment.ps1 -account $("." + $env:DEPLOY_ACCOUNT + "_account") -service $env:DEPLOY_SERVICE
+        run: python3 track_deployment.py --service $env:DEPLOY_SERVICE --environment $env:DEPLOY_ACCOUNT
         working-directory: deploy/
 
       - name: Combining API Test Environment Variables
