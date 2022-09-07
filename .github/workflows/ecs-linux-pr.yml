@@ -26,7 +26,7 @@ env:
   AWS_DEFAULT_REGION: ${{ secrets.region }}
   DEPLOY_SERVICE: ${{ inputs.service }}
   DEPLOY_ACCOUNT: ${{ inputs.account }}
-  TF_VAR_commit_sha: ${{ inputs.commit_hash }}
+  TF_VAR_commit_sha: ${{ inputs.commit_hash }}${{ github.run_attempt }}
 jobs:
   pr-checks:
     runs-on: ubuntu-20.04

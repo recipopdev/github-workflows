@@ -43,7 +43,7 @@ env:
   SONAR_SCAN_PATH: ${{ inputs.sonar_scan_path }}
   SONAR_TOKEN: ${{ secrets.sonar_token }}
   DATABASE_MIGRATION_DOCKERFILE: ${{ inputs.database_migration_dockerfile }}
-  TF_VAR_commit_sha: ${{ inputs.commit_hash }}
+  TF_VAR_commit_sha: ${{ inputs.commit_hash }}${{ github.run_attempt }}
 jobs:
   deploy-service:
     runs-on: ${{ (inputs.self_hosted && 'self-hosted') || 'ubuntu-20.04' }}
