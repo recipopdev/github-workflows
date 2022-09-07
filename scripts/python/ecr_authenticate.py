@@ -9,7 +9,7 @@ def create_tfvars(environment: str):
   ecr = get_aws_client("ecr", credentials)
   auth_token = ecr.get_authorization_token(registryIds=[fetch_account_number(environment)])["authorizationData"][0]["authorizationToken"]
   with open("terraform.tfvars", "w") as file:
-    file.write("docker_password = " + auth_token)  
+    file.write("docker_password = \"" + auth_token + "\"")  
 
 def main():
   parser = argparse.ArgumentParser(description="AWS ECR Authentication Script")
