@@ -4,11 +4,9 @@ from datetime import datetime, timedelta
 import logging
 import argparse
 import json
-import pytz
 import time
 import math
 
-tz=pytz.timezone("Europe/London")
 cluster="core-services"
 
 def track_rollout(deployment_id: str, environment: str, service: str) -> bool:
