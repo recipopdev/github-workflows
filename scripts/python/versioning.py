@@ -53,22 +53,16 @@ def main():
   parser.add_argument("--service", type=str, required=True, help="The name of the service we are interacting with")
   parser.add_argument("--fetch", action="store_true", help="Fetches the version of the service from AWS Parameter Store and store it in package.json format")
   parser.add_argument("--save", action="store_true", help="Saves the version of the service in AWS Parameter Store.")
-  parser.add_argument("--directory", action="store_true", help="The directory to find package.json in.")
+  parser.add_argument("--directory", nargs='?', const="./", type=str, help="The directory to find package.json in.")
 
   args = parser.parse_args()
 
   logging.getLogger().setLevel("INFO")
 
   if (args.fetch):
-    if (args.directory):
-      fetch(service=args.service, directory=args.directory)
-    else:
-      fetch(service=args.service)
+    fetch(service=args.service, directory=args.directory)
   elif (args.save):
-    if (args.directory):
-      save(service=args.service, directory=args.directory)
-    else:
-      save(service=args.service)
+    save(service=args.service, directory=args.directory)
   else:
     print("Error: please use one of either --fetch or --save")
 
