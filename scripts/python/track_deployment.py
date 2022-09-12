@@ -7,7 +7,7 @@ import json
 import time
 import math
 
-cluster="core-services"
+cluster = ""
 
 def track_rollout(deployment_id: str, environment: str, service: str) -> bool:
   logging.info("Starting the tracking of service rollout")
@@ -104,7 +104,7 @@ def main():
 
   parser.add_argument("--service", type=str, required=True, help="The name of the service we are interacting with")
   parser.add_argument("--environment", type=str, required=True, help="The name of the environment we are interacting with")
-  parser.add_argument("--cluster", nargs='?', const="core-services", type=str, help="The name of the environment we are interacting with")
+  parser.add_argument("--cluster", nargs='?', default="core-services", type=str, help="The name of the environment we are interacting with")
 
   args = parser.parse_args()
 
