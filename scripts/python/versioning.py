@@ -13,7 +13,7 @@ def retrieve_service_version(service: str):
   parameter_path = "/ecs/versions/" + service
   return ssm.get_parameter(Name=parameter_path)["Parameter"]["Value"]
 
-def fetch(service: str):
+def fetch(service: str, directory="./"):
   logging.info("Fetching the version in parameter store for service: " + service)
   if (os.path.isfile("../package.json")):
     logging.info("package.json already exists in the root directory of this repository, using it instead of creating")
@@ -25,16 +25,16 @@ def fetch(service: str):
     shutil.copy("../package.json", "package.json")
     logging.info("Successfuly updated package.json")
   else:
-    with open("package.json", "w") as file:
+    with open((directory + "package.json"), "w") as file:
       package = {}
       package["name"] = service
       package["version"] = retrieve_service_version(service=service)
       json.dump(package, file, indent=2)
     logging.info("Successfuly created package.json")
 
-def save(service: str):
+def save(service: str, directory="./"):
   logging.info("Attempting to save the version in parameter store for service: " + service)
-  with open("package.json", "r") as file:
+  with open((directory + "package.json"), "r") as file:
     local_version = json.load(file)["version"]
     remote_version = retrieve_service_version(service=service)
     if (version.parse(local_version) < version.parse(remote_version)):
@@ -53,15 +53,22 @@ def main():
   parser.add_argument("--service", type=str, required=True, help="The name of the service we are interacting with")
   parser.add_argument("--fetch", action="store_true", help="Fetches the version of the service from AWS Parameter Store and store it in package.json format")
   parser.add_argument("--save", action="store_true", help="Saves the version of the service in AWS Parameter Store.")
+  parser.add_argument("--directory", action="store_true", help="The directory to find package.json in.")
 
   args = parser.parse_args()
 
   logging.getLogger().setLevel("INFO")
 
   if (args.fetch):
-    fetch(service=args.service)
+    if (args.directory):
+      fetch(service=args.service, directory=args.directory)
+    else:
+      fetch(service=args.service)
   elif (args.save):
-    save(service=args.service)
+    if (args.directory):
+      save(service=args.service, directory=args.directory)
+    else:
+      save(service=args.service)
   else:
     print("Error: please use one of either --fetch or --save")
 
