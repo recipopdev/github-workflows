@@ -155,6 +155,6 @@ jobs:
 
       - name: Report Failed Pipeline
         if: cancelled() || failure()
-        id: pipeline-reporting-success
+        id: pipeline-reporting-failure
         run: python3 pipeline_reporting.py --service $env:DEPLOY_SERVICE --environment $env:DEPLOY_ACCOUNT --failure
         working-directory: deploy/
