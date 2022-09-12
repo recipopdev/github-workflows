@@ -53,7 +53,7 @@ def main():
   parser.add_argument("--service", type=str, required=True, help="The name of the service we are interacting with")
   parser.add_argument("--fetch", action="store_true", help="Fetches the version of the service from AWS Parameter Store and store it in package.json format")
   parser.add_argument("--save", action="store_true", help="Saves the version of the service in AWS Parameter Store.")
-  parser.add_argument("--directory", nargs='?', const="./", type=str, help="The directory to find package.json in.")
+  parser.add_argument("--directory", nargs='?', default="./", type=str, help="The directory to find package.json in.")
 
   args = parser.parse_args()
 
