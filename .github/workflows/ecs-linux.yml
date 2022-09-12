@@ -163,7 +163,7 @@ jobs:
       - name: Run Sonar Scanner
         if: ${{ inputs.sonar_scan_path != '' }}
         id: sonar-scan
-        run: docker run -e SONAR_HOST_URL="https://sonarqube.mgmt.newadimo.co" -e SONAR_LOGIN=$SONAR_TOKEN -v "$(pwd)/"$SONAR_SCAN_PATH":/usr/src" sonarsource/sonar-scanner-cli -Dsonar.projectKey=$DEPLOY_SERVICE
+        run: docker run -e SONAR_HOST_URL="https://sonarqube.mgmt.adimo.co" -e SONAR_LOGIN=$SONAR_TOKEN -v "$(pwd)/"$SONAR_SCAN_PATH":/usr/src" sonarsource/sonar-scanner-cli -Dsonar.projectKey=$DEPLOY_SERVICE
 
       - name: Run DotNet Sonar Scanner
         if: ${{ inputs.dotnet_sonar_scan }}
@@ -171,7 +171,7 @@ jobs:
         uses: calxus/action-sonarqube-dotnet@1.0.0
         with:
           sonarProjectKey: $DEPLOY_SERVICE
-          sonarHostname: "https://sonarqube.mgmt.newadimo.co"
+          sonarHostname: "https://sonarqube.mgmt.adimo.co"
 
       - name: Track deployment rollout
         id: track-rollout
