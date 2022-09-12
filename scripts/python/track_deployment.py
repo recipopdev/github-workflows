@@ -104,10 +104,14 @@ def main():
 
   parser.add_argument("--service", type=str, required=True, help="The name of the service we are interacting with")
   parser.add_argument("--environment", type=str, required=True, help="The name of the environment we are interacting with")
+  parser.add_argument("--cluster", nargs='?', const="core-services", type=str, help="The name of the environment we are interacting with")
 
   args = parser.parse_args()
 
   logging.getLogger().setLevel("INFO")
+
+  global cluster
+  cluster = args.cluster
 
   credentials = switch_role(account=args.environment, session_name="TrackDeploymentSession")
   ecs = get_aws_client("ecs", credentials)
