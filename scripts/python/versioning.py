@@ -13,7 +13,7 @@ def retrieve_service_version(service: str):
   parameter_path = "/ecs/versions/" + service
   return ssm.get_parameter(Name=parameter_path)["Parameter"]["Value"]
 
-def fetch(service: str, directory="./"):
+def fetch(service: str, directory: str):
   logging.info("Fetching the version in parameter store for service: " + service)
   if (os.path.isfile("../package.json")):
     logging.info("package.json already exists in the root directory of this repository, using it instead of creating")
@@ -32,7 +32,7 @@ def fetch(service: str, directory="./"):
       json.dump(package, file, indent=2)
     logging.info("Successfuly created package.json")
 
-def save(service: str, directory="./"):
+def save(service: str, directory: str):
   logging.info("Attempting to save the version in parameter store for service: " + service)
   with open((directory + "package.json"), "r") as file:
     local_version = json.load(file)["version"]
