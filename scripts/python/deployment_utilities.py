@@ -1,5 +1,6 @@
 import boto3
 import json
+from prometheus_client.exposition import basic_auth_handler
 
 def switch_role(account: str, session_name: str):
   sts_client = boto3.client("sts")
@@ -20,3 +21,9 @@ def get_aws_client(aws_service: str, credentials: dict):
     aws_secret_access_key=credentials['SecretAccessKey'],
     aws_session_token=credentials['SessionToken'],
   )
+
+def push_gateway_handler(url, method, timeout, headers, data):
+  sm_client = boto3.client("secretsmanager")
+  adimo_config = sm_client.get_secret_value(SecretId="/adimo/terraform")
+  adimo_config_json = json.loads(adimo_config["SecretString"])
+  return basic_auth_handler(url, method, timeout, headers, data, adimo_config_json["push_gateway_username"], adimo_config_json["push_gateway_password"])

@@ -50,7 +50,7 @@ jobs:
 
       - name: Install dependencies
         id: dependencies
-        run: pip3 install --user Jinja2 PyYAML boto3 packaging
+        run: pip3 install --user Jinja2 PyYAML boto3 packaging prometheus_client
         working-directory: deploy/
 
       - name: Fetch & iterate version

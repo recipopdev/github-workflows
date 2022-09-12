@@ -73,7 +73,7 @@ jobs:
 
       - name: Install dependencies
         id: dependencies
-        run: pip3 install --user Jinja2 PyYAML boto3 packaging
+        run: pip3 install --user Jinja2 PyYAML boto3 packaging prometheus_client
         working-directory: deploy/
 
       - name: Fetch version & iterate version
@@ -196,4 +196,15 @@ jobs:
         with:
           collection: deploy/tests/tests.json
           envVar: ${{ steps.combine-api-vars.outputs.api-test-vars }}
+
+      - name: Report Successful Pipeline
+        id: pipeline-reporting-success
+        run: python3 pipeline_reporting.py --service $DEPLOY_SERVICE --environment $DEPLOY_ACCOUNT --success
+        working-directory: deploy/
+
+      - name: Report Failed Pipeline
+        if: cancelled() || failure()
+        id: pipeline-reporting-success
+        run: python3 pipeline_reporting.py --service $DEPLOY_SERVICE --environment $DEPLOY_ACCOUNT --failure
+        working-directory: deploy/
 
