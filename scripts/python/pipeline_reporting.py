@@ -5,7 +5,6 @@ import argparse
 
 registry = CollectorRegistry()
 g = Gauge("pipeline_status", "The status of a pipeline", ["instance"], registry=registry)
-push_gateway_url = "https://push.mgmt.adimo.co"
 
 def success(service: str, environment: str):
   g.labels(instance=environment).set(1)

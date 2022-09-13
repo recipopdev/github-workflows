@@ -2,6 +2,8 @@ import boto3
 import json
 from prometheus_client.exposition import basic_auth_handler
 
+push_gateway_url = "https://push.mgmt.adimo.co"
+
 def switch_role(account: str, session_name: str):
   sts_client = boto3.client("sts")
   role_arn = "arn:aws:iam::" + fetch_account_number(account) + ":role/CI"
