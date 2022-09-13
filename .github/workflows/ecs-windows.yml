@@ -42,11 +42,6 @@ jobs:
           repository: recipopdev/github-workflows
           path: github-workflows
 
-      - uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_version: 1.1.4
-          terraform_wrapper: false
-
       - name: Copy deployment scripts
         id: deployment-scripts
         run: |
@@ -55,6 +50,11 @@ jobs:
       - name: Install dependencies
         id: dependencies
         run: pip3 install --user Jinja2 PyYAML boto3 packaging prometheus_client
+        working-directory: deploy/
+
+      - name: Report Running Pipeline
+        id: pipeline-reporting-running
+        run: python3 pipeline_reporting.py --service $env:DEPLOY_SERVICE --environment $env:DEPLOY_ACCOUNT --running
         working-directory: deploy/
 
       - name: Fetch version
@@ -86,6 +86,11 @@ jobs:
         run: |
           copy .\deploy\*.tf* .
           copy .\deploy\package.json .
+
+      - uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.1.4
+          terraform_wrapper: false
 
       - name: Terraform fmt
         id: fmt

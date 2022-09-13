@@ -15,6 +15,10 @@ def failure(service: str, environment: str):
   g.labels(environment=environment).set(0)
   push_to_gateway(push_gateway_url, job=service, registry=registry, handler=push_gateway_handler)
 
+def running(service: str, environment: str):
+  g.labels(environment=environment).set(2)
+  push_to_gateway(push_gateway_url, job=service, registry=registry, handler=push_gateway_handler)
+
 def main():
   parser = argparse.ArgumentParser(description="Pipeline Reporting Script")
 
@@ -22,6 +26,7 @@ def main():
   parser.add_argument("--service", type=str, required=True, help="The name of the service we are interacting with")
   parser.add_argument("--success", action="store_true", help="Indicates a successfull pipeline run")
   parser.add_argument("--failure", action="store_true", help="Indicates a failing pipeline run")
+  parser.add_argument("--running", action="store_true", help="Indicates a running pipeline")
 
   args = parser.parse_args()
 
@@ -31,8 +36,10 @@ def main():
     success(service=args.service, environment=args.environment)
   elif (args.failure):
     failure(service=args.service, environment=args.environment)
+  elif (args.running):
+    running(service=args.service, environment=args.environment)
   else:
-    print("Error: please use one of either --success or --failure")
+    print("Error: please use one of either --success or --failure or --running")
     exit(1)
 
 if __name__ == "__main__":
