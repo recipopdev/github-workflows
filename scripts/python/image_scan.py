@@ -1,5 +1,6 @@
 import boto3
 from deployment_utilities import *
+from prometheus_client import Gauge, CollectorRegistry, push_to_gateway
 import logging
 import argparse
 import base64
@@ -39,7 +40,7 @@ def image_scan(service:str, environment: str):
       exit(1)
     i = i + 1
   logging.info("Image scan complete, results are as follows")
-  print_image_scan_findings(ecr=ecr, service=service)
+  print_image_scan_findings(ecr=ecr, service=service, environment=environment)
   
 def retrieve_image_scan_status(ecr:boto3.client, service:str) -> str:
   image_details = ecr.describe_images(repositoryName=service)["imageDetails"]
@@ -49,12 +50,28 @@ def retrieve_image_scan_status(ecr:boto3.client, service:str) -> str:
       return image_details[0]["imageScanStatus"]["status"]
   return "ERROR"
 
-def print_image_scan_findings(ecr:boto3.client, service:str):
+def print_image_scan_findings(ecr:boto3.client, service:str, environment: str):
   image_details = ecr.describe_images(repositoryName=service)["imageDetails"]
   image_details.sort(key = lambda x:x["imagePushedAt"], reverse=True)
   if "imageScanFindingsSummary" in image_details[0]:
     if "findingSeverityCounts" in image_details[0]["imageScanFindingsSummary"]:
       print(image_details[0]["imageScanFindingsSummary"]["findingSeverityCounts"])
+      push_results(service=service, environment=environment, results=image_details[0]["imageScanFindingsSummary"]["findingSeverityCounts"])
+
+def push_results(service: str, environment: str, results: dict):
+  registry = CollectorRegistry()
+  for category in ["INFORMATIONAL", "LOW", "MEDIUM", "HIGH", "CRITICAL", "UNDEFINED"]:
+    g = Gauge("image_scan", "The vulnerabilities contained in an image", ["instance"], registry=registry)
+    g.labels(instance=environment).set(get_result(category=category, results=results))
+    push_to_gateway(push_gateway_url, job=(service + "_" + environment + "_" + category.lower()), registry=registry, handler=push_gateway_handler)
+  
+  
+def get_results(category: str, results: dict) -> int:
+  if (category in results):
+    return results[category]
+  else:
+    return 0
+
 
 def main():
   parser = argparse.ArgumentParser(description="AWS ECR Authentication Script")
