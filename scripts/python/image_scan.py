@@ -66,7 +66,7 @@ def push_results(service: str, environment: str, results: dict):
     push_to_gateway(push_gateway_url, job=(service + "_" + environment + "_" + category.lower()), registry=registry, handler=push_gateway_handler)
   
   
-def get_results(category: str, results: dict) -> int:
+def get_result(category: str, results: dict) -> int:
   if (category in results):
     return results[category]
   else:
