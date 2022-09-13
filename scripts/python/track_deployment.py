@@ -67,7 +67,7 @@ def check_edge_cases(deployments: dict, environment: str, service: str) -> dict:
         exit(1)
       elif (deployments[0]["desiredCount"] != 0):
         logging.error("No deployment to environment: " + environment + " has been found to track for service: " + service)
-        exit(1)
+        exit(0)
   if (len(deployments) > 2):
     logging.warning("More than 1 deployment is currently being deployed at once, will track the most recent")
     logging.warning("Try not to run one more pipeline per environment at a time")
