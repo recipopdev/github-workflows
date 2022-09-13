@@ -61,7 +61,7 @@ def print_image_scan_findings(ecr:boto3.client, service:str, environment: str):
 def push_results(service: str, environment: str, results: dict):
   registry = CollectorRegistry()
   for category in ["INFORMATIONAL", "LOW", "MEDIUM", "HIGH", "CRITICAL", "UNDEFINED"]:
-    g = Gauge("image_scan", "The vulnerabilities contained in an image", ["instance"], registry=registry)
+    g = Gauge(("image_scan_" + category.lower()), "The vulnerabilities contained in an image", ["instance"], registry=registry)
     g.labels(instance=environment).set(get_result(category=category, results=results))
     push_to_gateway(push_gateway_url, job=(service + "_" + environment + "_" + category.lower()), registry=registry, handler=push_gateway_handler)
   
