@@ -4,20 +4,20 @@ import logging
 import argparse
 
 registry = CollectorRegistry()
-g = Gauge("pipeline_status", "The status of a pipeline", ["environment"], registry=registry)
+g = Gauge("pipeline_status", "The status of a pipeline", ["instance"], registry=registry)
 push_gateway_url = "https://push.mgmt.adimo.co"
 
 def success(service: str, environment: str):
-  g.labels(environment=environment).set(1)
-  push_to_gateway(push_gateway_url, job=service, registry=registry, handler=push_gateway_handler)
+  g.labels(instance=environment).set(1)
+  push_to_gateway(push_gateway_url, job=(service + "_" + environment), registry=registry, handler=push_gateway_handler)
 
 def failure(service: str, environment: str):
-  g.labels(environment=environment).set(0)
-  push_to_gateway(push_gateway_url, job=service, registry=registry, handler=push_gateway_handler)
+  g.labels(instance=environment).set(0)
+  push_to_gateway(push_gateway_url, job=(service + "_" + environment), registry=registry, handler=push_gateway_handler)
 
 def running(service: str, environment: str):
-  g.labels(environment=environment).set(2)
-  push_to_gateway(push_gateway_url, job=service, registry=registry, handler=push_gateway_handler)
+  g.labels(instance=environment).set(2)
+  push_to_gateway(push_gateway_url, job=(service + "_" + environment), registry=registry, handler=push_gateway_handler)
 
 def main():
   parser = argparse.ArgumentParser(description="Pipeline Reporting Script")
