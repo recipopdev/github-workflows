@@ -9,7 +9,6 @@ on:
         required: true
         type: string
       commit_hash:
-        required: true
         type: string
       api_test_env_vars:
         required: true
@@ -31,7 +30,7 @@ env:
   DEPLOY_ACCOUNT: ${{ inputs.account }}
   API_TEST_ENV_VARS: ${{ inputs.api_test_env_vars }}
   API_TEST_SECRET_VARS: ${{ secrets.api_test_secret_vars }}
-  TF_VAR_commit_sha: ${{ inputs.commit_hash }}${{ github.run_attempt }}
+  TF_VAR_commit_sha: ${{ github.sha }}${{ github.run_attempt }}
 jobs:
   deploy-service:
     runs-on: windows-2019
