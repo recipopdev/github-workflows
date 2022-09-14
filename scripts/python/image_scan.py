@@ -18,6 +18,7 @@ def image_scan(service:str, environment: str):
     if "status" in image_details[0]["imageScanStatus"]:
       if image_details[0]["imageScanStatus"]["status"] == "COMPLETE":
         logging.warning("Image scan already completed")
+        print_image_scan_findings(ecr=ecr, service=service, environment=environment)
         exit(0)
       elif image_details[0]["imageScanStatus"]["status"] == "IN_PROGRESS":
         logging.warning("Image scan was already started")
