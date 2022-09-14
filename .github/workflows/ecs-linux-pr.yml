@@ -9,7 +9,6 @@ on:
         required: true
         type: string
       commit_hash:
-        required: true
         type: string
     secrets:
       aws_key:
@@ -26,7 +25,7 @@ env:
   AWS_DEFAULT_REGION: ${{ secrets.region }}
   DEPLOY_SERVICE: ${{ inputs.service }}
   DEPLOY_ACCOUNT: ${{ inputs.account }}
-  TF_VAR_commit_sha: ${{ inputs.commit_hash }}${{ github.run_attempt }}
+  TF_VAR_commit_sha: ${{ github.sha }}${{ github.run_attempt }}
 jobs:
   pr-checks:
     runs-on: ubuntu-20.04
