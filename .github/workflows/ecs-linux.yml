@@ -154,7 +154,7 @@ jobs:
             --build-arg AWS_ACCESS_KEY_ID=$SWITCHED_AWS_ACCESS_KEY_ID \
             --build-arg AWS_SECRET_ACCESS_KEY=$SWITCHED_AWS_SECRET_ACCESS_KEY \
             --build-arg AWS_SESSION_TOKEN=$SWITCHED_AWS_SESSION_TOKEN \
-            --build-arg DEPLOY_ACCOUNT=$SHORT_ACCOUNT_NAME
+            --build-arg DEPLOY_ACCOUNT=$SHORT_ACCOUNT_NAME \
             -f $DATABASE_MIGRATION_DOCKERFILE \
             .
 
