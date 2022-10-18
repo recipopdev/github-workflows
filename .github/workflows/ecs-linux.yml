@@ -191,7 +191,7 @@ jobs:
         with:
           sonarProjectKey: $DEPLOY_SERVICE
           sonarHostname: "https://sonarqube.mgmt.adimo.co"
-          nugetSource: http://nuget.services.internal.mgmt.adimo.co/v3/index.json
+          nugetSource: "http://nuget.services.internal.mgmt.adimo.co/v3/index.json"
           
 
       - name: Track deployment rollout
