@@ -184,10 +184,10 @@ jobs:
         id: sonar-scan
         run: docker run -e SONAR_HOST_URL="https://sonarqube.mgmt.adimo.co" -e SONAR_LOGIN=$SONAR_TOKEN -v "$(pwd)/"$SONAR_SCAN_PATH":/usr/src" sonarsource/sonar-scanner-cli -Dsonar.projectKey=$DEPLOY_SERVICE
 
-      - name: Run DotNet Sonar Scanner
+      - name: Run DotNet Sonar Scanner Self Hosted
         if: ${{ inputs.dotnet_sonar_scan }}
         id: dotnet-sonar-scan
-        uses: calxus/action-sonarqube-dotnet@1.0.3
+        uses: calxus/action-sonarqube-dotnet@1.0.4
         with:
           sonarProjectKey: $DEPLOY_SERVICE
           sonarHostname: "https://sonarqube.mgmt.adimo.co"
