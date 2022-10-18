@@ -187,10 +187,12 @@ jobs:
       - name: Run DotNet Sonar Scanner
         if: ${{ inputs.dotnet_sonar_scan }}
         id: dotnet-sonar-scan
-        uses: calxus/action-sonarqube-dotnet@1.0.0
+        uses: calxus/action-sonarqube-dotnet@1.0.2
         with:
           sonarProjectKey: $DEPLOY_SERVICE
           sonarHostname: "https://sonarqube.mgmt.adimo.co"
+          nugetSource: http://nuget.services.internal.mgmt.adimo.co/v3/index.json
+          
 
       - name: Track deployment rollout
         id: track-rollout
