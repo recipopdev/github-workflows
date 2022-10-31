@@ -22,6 +22,9 @@ on:
         type: boolean
       pre_script:
         type: string
+      track_deployment:
+        type: boolean
+        default: true
     secrets:
       aws_key:
         required: true
@@ -195,12 +198,15 @@ jobs:
           
 
       - name: Track deployment rollout
+        if: inputs.track_deployment == true
         id: track-rollout
         run: python3 track_deployment.py --service $DEPLOY_SERVICE --environment $DEPLOY_ACCOUNT
         working-directory: deploy/
 
       - name: Combining API Test Environment Variables
-        if: ${{ inputs.api_test_env_vars != '' }}
+        if: |
+          inputs.api_test_env_vars != '' &&
+          inputs.track_deployment == true
         id: combine-api-vars
         run: |
           if [[ $API_TEST_SECRET_VARS != "" ]]; then
@@ -211,7 +217,9 @@ jobs:
           echo "::set-output name=api-test-vars::$(echo $API_TEST_VARS)"
 
       - name: Run API Tests
-        if: ${{ inputs.api_test_env_vars != '' }}
+        if: |
+          inputs.api_test_env_vars != '' &&
+          inputs.track_deployment == true
         id: run-tests
         uses: matt-ball/newman-action@master
         with:
