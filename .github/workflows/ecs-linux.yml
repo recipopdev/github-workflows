@@ -25,6 +25,9 @@ on:
       track_deployment:
         type: boolean
         default: true
+      working_directory:
+        type: string
+        default: "."
     secrets:
       aws_key:
         required: true
@@ -67,18 +70,18 @@ jobs:
       - name: Copy deployment scripts
         id: deployment-scripts
         run: |
-          cp github-workflows/scripts/python/*.py deploy/
-          cp github-workflows/scripts/linux/*.sh deploy/
+          cp github-workflows/scripts/python/*.py ${{ inputs.working_directory }}/deploy/
+          cp github-workflows/scripts/linux/*.sh ${{ inputs.working_directory }}/deploy/
 
       - name: Install dependencies
         id: dependencies
         run: pip3 install --user Jinja2 PyYAML boto3 packaging prometheus_client
-        working-directory: deploy/
+        working-directory: ${{ inputs.working_directory }}/deploy/
 
       - name: Report Running Pipeline
         id: pipeline-reporting-running
         run: python3 pipeline_reporting.py --service $DEPLOY_SERVICE --environment $DEPLOY_ACCOUNT --running
-        working-directory: deploy/
+        working-directory: ${{ inputs.working_directory }}/deploy/
 
       - name: Fetch version & iterate version
         id: iterate-version
@@ -90,23 +93,23 @@ jobs:
           if [[ $DEPLOY_ACCOUNT == "production" ]]; then
             npm version minor
           fi
-        working-directory: deploy/
+        working-directory: ${{ inputs.working_directory }}/deploy/
 
       - name: Generate ECR token
         id: token
         run: python3 ecr_authenticate.py --environment $DEPLOY_ACCOUNT
-        working-directory: deploy/
+        working-directory: ${{ inputs.working_directory }}/deploy/
 
       - name: Bootstrap terraform files
         id: bootstrap
         run: python3 bootstrap.py;
-        working-directory: deploy/
+        working-directory: ${{ inputs.working_directory }}/deploy/
 
       - name: Prepare deployment files
         id: prepare
         run: |
-          cp ./deploy/*.tf* .
-          cp ./deploy/package.json .
+          cp ${{ inputs.working_directory }}/deploy/*.tf* .
+          cp ${{ inputs.working_directory }}/deploy/package.json .
 
       - uses: hashicorp/setup-terraform@v1
         with:
@@ -116,19 +119,23 @@ jobs:
       - name: Terraform fmt
         id: fmt
         run: terraform fmt -check -diff
+        working-directory: ${{ inputs.working_directory }}
 
       - name: Terraform Init
         id: init
         run: terraform init -input=false
+        working-directory: ${{ inputs.working_directory }}
         
       - name: Pre Script
         if: ${{ inputs.pre_script != '' }}
         id: pre-script
         run: bash ${{ inputs.pre_script }}
+        working-directory: ${{ inputs.working_directory }}
 
       - name: Terraform Validate
         id: validate
         run: terraform validate -no-color
+        working-directory: ${{ inputs.working_directory }}
 
       - name: Select Workspace
         id: workspace
@@ -139,6 +146,7 @@ jobs:
           if [[ $DEPLOY_ACCOUNT == "production" ]]; then
             terraform workspace select prod
           fi
+        working-directory: ${{ inputs.working_directory }}
 
       - name: Run Database Migration
         if: ${{ inputs.database_migration_dockerfile != '' }}
@@ -160,10 +168,12 @@ jobs:
             --build-arg DEPLOY_ACCOUNT=$SHORT_ACCOUNT_NAME \
             -f $DATABASE_MIGRATION_DOCKERFILE \
             .
+        working-directory: ${{ inputs.working_directory }}
 
       - name: Terraform Apply
         id: apply
         run: terraform apply -auto-approve -input=false
+        working-directory: ${{ inputs.working_directory }}
         
       - name: Commit version
         id: commit-version
@@ -171,21 +181,24 @@ jobs:
           if [[ $DEPLOY_ACCOUNT != "development" ]]; then
             python3 versioning.py --service $DEPLOY_SERVICE --save
           fi
-        working-directory: deploy/
+        working-directory: ${{ inputs.working_directory }}/deploy/
 
       - name: Terraform Confirm
         id: confirm
         run: terraform plan -input=false -detailed-exitcode
+        working-directory: ${{ inputs.working_directory }}
+        
 
       - name: Scan Docker Image
         id: image-scan
         run: python3 image_scan.py --environment $DEPLOY_ACCOUNT --service $DEPLOY_SERVICE
-        working-directory: deploy/
+        working-directory: ${{ inputs.working_directory }}/deploy/
 
       - name: Run Sonar Scanner
         if: ${{ inputs.sonar_scan_path != '' }}
         id: sonar-scan
         run: docker run -e SONAR_HOST_URL="https://sonarqube.mgmt.adimo.co" -e SONAR_LOGIN=$SONAR_TOKEN -v "$(pwd)/"$SONAR_SCAN_PATH":/usr/src" sonarsource/sonar-scanner-cli -Dsonar.projectKey=$DEPLOY_SERVICE
+        working-directory: ${{ inputs.working_directory }}
 
       - name: Run DotNet Sonar Scanner Self Hosted
         if: ${{ inputs.dotnet_sonar_scan }}
@@ -201,7 +214,7 @@ jobs:
         if: inputs.track_deployment == true
         id: track-rollout
         run: python3 track_deployment.py --service $DEPLOY_SERVICE --environment $DEPLOY_ACCOUNT
-        working-directory: deploy/
+        working-directory: ${{ inputs.working_directory }}/deploy/
 
       - name: Combining API Test Environment Variables
         if: |
@@ -215,6 +228,7 @@ jobs:
             API_TEST_VARS=$(echo -e "$API_TEST_ENV_VARS")
           fi
           echo "::set-output name=api-test-vars::$(echo $API_TEST_VARS)"
+        working-directory: ${{ inputs.working_directory }}
 
       - name: Run API Tests
         if: |
@@ -223,17 +237,17 @@ jobs:
         id: run-tests
         uses: matt-ball/newman-action@master
         with:
-          collection: deploy/tests/tests.json
+          collection: ${{ inputs.working_directory }}/deploy/tests/tests.json
           envVar: ${{ steps.combine-api-vars.outputs.api-test-vars }}
 
       - name: Report Successful Pipeline
         id: pipeline-reporting-success
         run: python3 pipeline_reporting.py --service $DEPLOY_SERVICE --environment $DEPLOY_ACCOUNT --success
-        working-directory: deploy/
+        working-directory: ${{ inputs.working_directory }}/deploy/
 
       - name: Report Failed Pipeline
         if: cancelled() || failure()
         id: pipeline-reporting-failure
         run: python3 pipeline_reporting.py --service $DEPLOY_SERVICE --environment $DEPLOY_ACCOUNT --failure
-        working-directory: deploy/
+        working-directory: ${{ inputs.working_directory }}/deploy/
 
