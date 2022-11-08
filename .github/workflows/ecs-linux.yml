@@ -203,7 +203,7 @@ jobs:
       - name: Run DotNet Sonar Scanner Self Hosted
         if: ${{ inputs.dotnet_sonar_scan }}
         id: dotnet-sonar-scan
-        uses: calxus/action-sonarqube-dotnet@1.0.6
+        uses: calxus/action-sonarqube-dotnet@1.0.7
         with:
           sonarProjectKey: $DEPLOY_SERVICE
           sonarHostname: "https://sonarqube.mgmt.adimo.co"
