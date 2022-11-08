@@ -108,8 +108,8 @@ jobs:
       - name: Prepare deployment files
         id: prepare
         run: |
-          cp ${{ inputs.working_directory }}/deploy/*.tf* .
-          cp ${{ inputs.working_directory }}/deploy/package.json .
+          cp ${{ inputs.working_directory }}/deploy/*.tf* ${{ inputs.working_directory }}/
+          cp ${{ inputs.working_directory }}/deploy/package.json ${{ inputs.working_directory }}/
 
       - uses: hashicorp/setup-terraform@v1
         with:
