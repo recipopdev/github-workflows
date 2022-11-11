@@ -11,7 +11,6 @@ on:
       commit_hash:
         type: string
       api_test_env_vars:
-        required: true
         type: string
       pre_script:
         type: string
@@ -157,7 +156,9 @@ jobs:
         working-directory: ${{ inputs.working_directory }}\deploy\
 
       - name: Combining API Test Environment Variables
-        if: inputs.track_deployment == true
+        if: |
+          inputs.api_test_env_vars != '' &&
+          inputs.track_deployment == true
         id: combine-api-vars
         run: |
           $API_TEST_VARS=$("$env:API_TEST_ENV_VARS")
@@ -169,7 +170,9 @@ jobs:
         working-directory: ${{ inputs.working_directory }}
 
       - name: Run API Tests
-        if: inputs.track_deployment == true
+        if: |
+          inputs.api_test_env_vars != '' &&
+          inputs.track_deployment == true
         id: run-tests
         uses: matt-ball/newman-action@master
         with:
