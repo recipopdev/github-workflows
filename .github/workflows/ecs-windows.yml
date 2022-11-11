@@ -18,6 +18,9 @@ on:
       track_deployment:
         type: boolean
         default: true
+      working_directory:
+        type: string
+        default: "."
     secrets:
       aws_key:
         required: true
@@ -49,17 +52,17 @@ jobs:
       - name: Copy deployment scripts
         id: deployment-scripts
         run: |
-          copy github-workflows\scripts\python\*.py deploy\
+          copy github-workflows\scripts\python\*.py ${{ inputs.working_directory }}\deploy\
 
       - name: Install dependencies
         id: dependencies
         run: pip3 install --user Jinja2 PyYAML boto3 packaging prometheus_client
-        working-directory: deploy/
+        working-directory: ${{ inputs.working_directory }}\deploy\
 
       - name: Report Running Pipeline
         id: pipeline-reporting-running
         run: python3 pipeline_reporting.py --service $env:DEPLOY_SERVICE --environment $env:DEPLOY_ACCOUNT --running
-        working-directory: deploy/
+        working-directory: ${{ inputs.working_directory }}\deploy\
 
       - name: Fetch version
         id: fetch-version
@@ -73,23 +76,23 @@ jobs:
           {
             npm version minor
           }
-        working-directory: deploy/
+        working-directory: ${{ inputs.working_directory }}\deploy\
 
       - name: Generate ECR token
         id: token
         run: python3 ecr_authenticate.py --environment $env:DEPLOY_ACCOUNT
-        working-directory: deploy/
+        working-directory: ${{ inputs.working_directory }}\deploy\
 
       - name: Bootstrap terraform files
         id: bootstrap
         run: python3 bootstrap.py;
-        working-directory: deploy/
+        working-directory: ${{ inputs.working_directory }}\deploy\
 
       - name: Prepare deployment files
         id: prepare
         run: |
-          copy .\deploy\*.tf* .
-          copy .\deploy\package.json .
+          copy ${{ inputs.working_directory }}\deploy\*.tf* ${{ inputs.working_directory }}\
+          copy ${{ inputs.working_directory }}\deploy\package.json ${{ inputs.working_directory }}\
 
       - uses: hashicorp/setup-terraform@v1
         with:
@@ -99,19 +102,23 @@ jobs:
       - name: Terraform fmt
         id: fmt
         run: terraform fmt -check -diff
+        working-directory: ${{ inputs.working_directory }}
 
       - name: Terraform Init
         id: init
         run: terraform init -input=false
+        working-directory: ${{ inputs.working_directory }}
       
       - name: Pre Script
         if: ${{ inputs.pre_script != '' }}
         id: pre-script
         run: powershell ${{ inputs.pre_script }}
+        working-directory: ${{ inputs.working_directory }}
 
       - name: Terraform Validate
         id: validate
         run: terraform validate -no-color
+        working-directory: ${{ inputs.working_directory }}
 
       - name: Select Workspace
         id: workspace
@@ -124,27 +131,30 @@ jobs:
           {
             terraform workspace select prod
           }
+        working-directory: ${{ inputs.working_directory }}
 
       - name: Terraform Apply
         id: apply
         run: terraform apply -auto-approve -input=false
+        working-directory: ${{ inputs.working_directory }}
 
       - name: Commit version
         id: commit-version
         if: ${{ inputs.account != 'development' }}
         run: |
           python3 versioning.py --service $env:DEPLOY_SERVICE --save
-        working-directory: deploy/
+        working-directory: ${{ inputs.working_directory }}\deploy\
 
       - name: Terraform Confirm
         id: confirm
         run: terraform plan -input=false -detailed-exitcode
+        working-directory: ${{ inputs.working_directory }}
 
       - name: Track deployment rollout
         if: inputs.track_deployment == true
         id: track-rollout
         run: python3 track_deployment.py --service $env:DEPLOY_SERVICE --environment $env:DEPLOY_ACCOUNT
-        working-directory: deploy/
+        working-directory: ${{ inputs.working_directory }}\deploy\
 
       - name: Combining API Test Environment Variables
         if: inputs.track_deployment == true
@@ -156,6 +166,7 @@ jobs:
             $API_TEST_VARS=$("$env:API_TEST_ENV_VARS`r`n$env:API_TEST_SECRET_VARS" | jq -s 'add' --raw-output)
           }
           echo "::set-output name=api-test-vars::$($API_TEST_VARS)"
+        working-directory: ${{ inputs.working_directory }}
 
       - name: Run API Tests
         if: inputs.track_deployment == true
@@ -168,10 +179,10 @@ jobs:
       - name: Report Successful Pipeline
         id: pipeline-reporting-success
         run: python3 pipeline_reporting.py --service $env:DEPLOY_SERVICE --environment $env:DEPLOY_ACCOUNT --success
-        working-directory: deploy/
+        working-directory: ${{ inputs.working_directory }}\deploy\
 
       - name: Report Failed Pipeline
         if: cancelled() || failure()
         id: pipeline-reporting-failure
         run: python3 pipeline_reporting.py --service $env:DEPLOY_SERVICE --environment $env:DEPLOY_ACCOUNT --failure
-        working-directory: deploy/
+        working-directory: ${{ inputs.working_directory }}\deploy\
