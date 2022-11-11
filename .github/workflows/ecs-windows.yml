@@ -13,6 +13,11 @@ on:
       api_test_env_vars:
         required: true
         type: string
+      pre_script:
+        type: string
+      track_deployment:
+        type: boolean
+        default: true
     secrets:
       aws_key:
         required: true
@@ -98,6 +103,11 @@ jobs:
       - name: Terraform Init
         id: init
         run: terraform init -input=false
+      
+      - name: Pre Script
+        if: ${{ inputs.pre_script != '' }}
+        id: pre-script
+        run: powershell ${{ inputs.pre_script }}
 
       - name: Terraform Validate
         id: validate
@@ -131,11 +141,13 @@ jobs:
         run: terraform plan -input=false -detailed-exitcode
 
       - name: Track deployment rollout
+        if: inputs.track_deployment == true
         id: track-rollout
         run: python3 track_deployment.py --service $env:DEPLOY_SERVICE --environment $env:DEPLOY_ACCOUNT
         working-directory: deploy/
 
       - name: Combining API Test Environment Variables
+        if: inputs.track_deployment == true
         id: combine-api-vars
         run: |
           $API_TEST_VARS=$("$env:API_TEST_ENV_VARS")
@@ -146,6 +158,7 @@ jobs:
           echo "::set-output name=api-test-vars::$($API_TEST_VARS)"
 
       - name: Run API Tests
+        if: inputs.track_deployment == true
         id: run-tests
         uses: matt-ball/newman-action@master
         with:
