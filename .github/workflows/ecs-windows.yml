@@ -47,6 +47,12 @@ jobs:
         with:
           repository: recipopdev/github-workflows
           path: github-workflows
+      
+      - name: Pre Script
+        if: ${{ inputs.pre_script != '' }}
+        id: pre-script
+        run: powershell ${{ inputs.pre_script }}
+        working-directory: ${{ inputs.working_directory }}
 
       - name: Copy deployment scripts
         id: deployment-scripts
@@ -106,12 +112,6 @@ jobs:
       - name: Terraform Init
         id: init
         run: terraform init -input=false
-        working-directory: ${{ inputs.working_directory }}
-      
-      - name: Pre Script
-        if: ${{ inputs.pre_script != '' }}
-        id: pre-script
-        run: powershell ${{ inputs.pre_script }}
         working-directory: ${{ inputs.working_directory }}
 
       - name: Terraform Validate
