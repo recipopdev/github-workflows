@@ -1,5 +1,5 @@
 name: Deploy Service
-on: 
+on:
   workflow_call:
     inputs:
       service:
@@ -28,6 +28,9 @@ on:
       working_directory:
         type: string
         default: "."
+      skip_versioning:
+        type: boolean
+        default: false
     secrets:
       aws_key:
         required: true
@@ -37,9 +40,8 @@ on:
         required: true
       sonar_token:
       api_test_secret_vars:
-      
 
-env: 
+env:
   AWS_ACCESS_KEY_ID: ${{ secrets.aws_key }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret }}
   AWS_DEFAULT_REGION: ${{ secrets.region }}
@@ -55,7 +57,6 @@ jobs:
   deploy-service:
     runs-on: ${{ (inputs.self_hosted && 'self-hosted') || 'ubuntu-20.04' }}
     steps:
-
       - name: Preparing working directory on self hosted runner
         if: ${{ inputs.self_hosted }}
         id: prep
@@ -84,6 +85,7 @@ jobs:
         working-directory: ${{ inputs.working_directory }}/deploy/
 
       - name: Fetch version & iterate version
+        if: inputs.skip_versioning == false
         id: iterate-version
         run: |
           python3 versioning.py --service $DEPLOY_SERVICE --fetch
@@ -109,7 +111,7 @@ jobs:
         id: prepare
         run: |
           cp ${{ inputs.working_directory }}/deploy/*.tf* ${{ inputs.working_directory }}/
-          cp ${{ inputs.working_directory }}/deploy/package.json ${{ inputs.working_directory }}/
+          cp ${{ inputs.working_directory }}/deploy/package.json ${{ inputs.working_directory }}/ 2>/dev/null || true
 
       - uses: hashicorp/setup-terraform@v1
         with:
@@ -125,7 +127,7 @@ jobs:
         id: init
         run: terraform init -input=false
         working-directory: ${{ inputs.working_directory }}
-        
+
       - name: Pre Script
         if: ${{ inputs.pre_script != '' }}
         id: pre-script
@@ -174,8 +176,9 @@ jobs:
         id: apply
         run: terraform apply -auto-approve -input=false
         working-directory: ${{ inputs.working_directory }}
-        
+
       - name: Commit version
+        if: inputs.skip_versioning == false
         id: commit-version
         run: |
           if [[ $DEPLOY_ACCOUNT != "development" ]]; then
@@ -187,7 +190,6 @@ jobs:
         id: confirm
         run: terraform plan -input=false -detailed-exitcode
         working-directory: ${{ inputs.working_directory }}
-        
 
       - name: Scan Docker Image
         id: image-scan
@@ -208,7 +210,6 @@ jobs:
           sonarProjectKey: $DEPLOY_SERVICE
           sonarHostname: "https://sonarqube.mgmt.adimo.co"
           nugetSource: "http://nuget.services.internal.mgmt.adimo.co/v3/index.json"
-          
 
       - name: Track deployment rollout
         if: inputs.track_deployment == true
@@ -250,4 +251,3 @@ jobs:
         id: pipeline-reporting-failure
         run: python3 pipeline_reporting.py --service $DEPLOY_SERVICE --environment $DEPLOY_ACCOUNT --failure
         working-directory: ${{ inputs.working_directory }}/deploy/
-
