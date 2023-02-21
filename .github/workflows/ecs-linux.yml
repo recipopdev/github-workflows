@@ -111,7 +111,7 @@ jobs:
         id: prepare
         run: |
           cp ${{ inputs.working_directory }}/deploy/*.tf* ${{ inputs.working_directory }}/
-          cp ${{ inputs.working_directory }}/deploy/package.json ${{ inputs.working_directory }}/
+          cp ${{ inputs.working_directory }}/deploy/package.json ${{ inputs.working_directory }}/ 2>/dev/null || true
 
       - uses: hashicorp/setup-terraform@v1
         with:
