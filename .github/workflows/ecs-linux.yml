@@ -28,7 +28,7 @@ on:
       working_directory:
         type: string
         default: "."
-      skip_versioning:
+      lambda_deployment:
         type: boolean
         default: false
     secrets:
@@ -85,7 +85,7 @@ jobs:
         working-directory: ${{ inputs.working_directory }}/deploy/
 
       - name: Fetch version & iterate version
-        if: inputs.skip_versioning == false
+        if: inputs.lambda_deployment == false
         id: iterate-version
         run: |
           python3 versioning.py --service $DEPLOY_SERVICE --fetch
@@ -178,7 +178,7 @@ jobs:
         working-directory: ${{ inputs.working_directory }}
 
       - name: Commit version
-        if: inputs.skip_versioning == false
+        if: inputs.lambda_deployment == false
         id: commit-version
         run: |
           if [[ $DEPLOY_ACCOUNT != "development" ]]; then
@@ -192,6 +192,7 @@ jobs:
         working-directory: ${{ inputs.working_directory }}
 
       - name: Scan Docker Image
+        if: inputs.lambda_deployment == false
         id: image-scan
         run: python3 image_scan.py --environment $DEPLOY_ACCOUNT --service $DEPLOY_SERVICE
         working-directory: ${{ inputs.working_directory }}/deploy/
