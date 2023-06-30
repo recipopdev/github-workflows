@@ -38,8 +38,6 @@ on:
         required: true
       region:
         required: true
-      github_token:
-        required: false
       sonar_token:
       api_test_secret_vars:
 
@@ -55,7 +53,6 @@ env:
   SONAR_TOKEN: ${{ secrets.sonar_token }}
   DATABASE_MIGRATION_DOCKERFILE: ${{ inputs.database_migration_dockerfile }}
   TF_VAR_commit_sha: ${{ github.sha }}${{ github.run_attempt }}
-  GITHUB_TOKEN: ${{ secrets.github_token }}
 jobs:
   deploy-service:
     runs-on: ${{ (inputs.self_hosted && 'self-hosted') || 'ubuntu-20.04' }}
