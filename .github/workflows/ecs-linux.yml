@@ -56,7 +56,7 @@ env:
   TF_VAR_github_token: ${{ secrets.GITHUB_TOKEN }}
 jobs:
   deploy-service:
-    runs-on: ${{ (inputs.self_hosted && '[self-hosted, test]') || 'ubuntu-20.04' }}
+    runs-on: ${{ (inputs.self_hosted && 'self-hosted') || 'ubuntu-20.04' }}
     steps:
       - name: Preparing working directory on self hosted runner
         if: ${{ inputs.self_hosted }}
