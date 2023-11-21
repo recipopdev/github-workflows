@@ -66,8 +66,8 @@ jobs:
         id: prep
         run: sudo chown -R $USER:$USER /home/ubuntu/actions-runner/_work/$(echo "${{ github.repository }}" | sed "s|${{ github.repository_owner }}/||")
 
-      - uses: actions/checkout@v2
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           repository: recipopdev/github-workflows
           path: github-workflows
@@ -124,7 +124,7 @@ jobs:
           cp ${{ inputs.working_directory }}/deploy/*.tf* ${{ inputs.working_directory }}/
           cp ${{ inputs.working_directory }}/deploy/package.json ${{ inputs.working_directory }}/ 2>/dev/null || true
 
-      - uses: hashicorp/setup-terraform@v1
+      - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.1.4
           terraform_wrapper: false
