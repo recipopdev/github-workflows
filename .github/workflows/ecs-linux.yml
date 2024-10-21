@@ -34,6 +34,9 @@ on:
       node_cache:
         type: string
         default: ""
+      scan_docker_image:
+        type: boolean
+        default: true
     secrets:
       aws_key:
         required: true
@@ -203,7 +206,7 @@ jobs:
         working-directory: ${{ inputs.working_directory }}
 
       - name: Scan Docker Image
-        if: inputs.lambda_deployment == false
+        if: inputs.lambda_deployment == false || inputs.scan_docker_image == false
         id: image-scan
         run: python3 image_scan.py --environment $DEPLOY_ACCOUNT --service $DEPLOY_SERVICE
         working-directory: ${{ inputs.working_directory }}/deploy/
