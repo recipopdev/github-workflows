@@ -5,6 +5,9 @@ on:
       service:
         required: true
         type: string
+      service_friendly:
+        required: false
+        type: string
       account:
         required: true
         type: string
@@ -75,6 +78,9 @@ jobs:
           webhook-uri: ""
           environment: "Production"
           timezone: "GMT"
+          custom-facts: |
+            - name: Service
+              value: ${{ inputs.service_friendly }}
 
       - name: Preparing working directory on self hosted runner
         if: ${{ inputs.self_hosted }}

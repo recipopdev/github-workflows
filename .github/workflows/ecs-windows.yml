@@ -5,6 +5,9 @@ on:
       service:
         required: true
         type: string
+      service_friendly:
+        required: false
+        type: string
       account:
         required: true
         type: string
@@ -20,6 +23,9 @@ on:
       working_directory:
         type: string
         default: "."
+      notify_teams:
+        type: boolean
+        default: false
     secrets:
       aws_key:
         required: true
@@ -42,6 +48,18 @@ jobs:
   deploy-service:
     runs-on: windows-2019
     steps:
+      - name: Notify Teams
+        if: ${{ inputs.notify_teams == true }}
+        uses: dchourasia/ms-teams-notification@1.1
+        with:
+          github-token: ${{ github.token }}
+          webhook-uri: ""
+          environment: "Production"
+          timezone: "GMT"
+          custom-facts: |
+            - name: Service
+              value: ${{ inputs.service_friendly }}
+
       - uses: actions/checkout@v2
       - uses: actions/checkout@v2
         with:
