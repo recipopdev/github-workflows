@@ -37,6 +37,9 @@ on:
       skip_docker_scan:
         type: boolean
         default: false
+      notify_teams:
+        type: boolean
+        default: false
     secrets:
       aws_key:
         required: true
@@ -64,6 +67,15 @@ jobs:
   deploy-service:
     runs-on: ${{ (inputs.self_hosted && 'self-hosted') || 'ubuntu-20.04' }}
     steps:
+      - name: Notify Teams
+        if: ${{ inputs.notify_teams == true }}
+        uses: dchourasia/ms-teams-notification@1.1
+        with:
+          github-token: ${{ github.token }}
+          webhook-uri: ""
+          environment: "Production"
+          timezone: "GMT"
+
       - name: Preparing working directory on self hosted runner
         if: ${{ inputs.self_hosted }}
         id: prep
