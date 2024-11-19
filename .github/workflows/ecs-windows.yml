@@ -53,7 +53,7 @@ jobs:
         uses: dchourasia/ms-teams-notification@1.1
         with:
           github-token: ${{ github.token }}
-          webhook-uri: "https://prod-22.uksouth.logic.azure.com:443/workflows/f3ab6fdb6ef44a5991fe0da9e697d885/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=I0hndthgFgOEQfFuzP8h_NgtbT9wbMR7jjJ4eHdT9N0"
+          webhook-uri: "https://prod-30.uksouth.logic.azure.com:443/workflows/413bcff5a147467bae570aa680f50a3e/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=YYAwSATQH_Vswwdq5FTwd-z2BC4xlPjHT338gjPFYFw"
           environment: "Production"
           timezone: "GMT"
           custom-facts: |
