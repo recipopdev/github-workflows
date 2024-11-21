@@ -78,9 +78,7 @@ jobs:
           webhook-uri: ${{ secrets.TEAMS_WEBHOOK_URL }}
           environment: "Production"
           timezone: "GMT"
-          custom-facts: |
-            - name: Service
-              value: ${{ inputs.service_friendly }}
+          card-layout-start: cozy
 
       - name: Preparing working directory on self hosted runner
         if: ${{ inputs.self_hosted }}

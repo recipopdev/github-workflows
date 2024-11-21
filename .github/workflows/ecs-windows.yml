@@ -53,12 +53,10 @@ jobs:
         uses: dchourasia/ms-teams-notification@1.1
         with:
           github-token: ${{ github.token }}
-          webhook-uri: "https://adimoteam.webhook.office.com/webhookb2/7585d1b8-84dd-4f01-b068-576514a89ed9@8b60d900-7a63-427e-8348-dd74fa6cc108/IncomingWebhook/9fffa6befbdc441aa962478d96fe946b/15b3f0e8-5c1c-4a1d-8533-3fb342760985/V2ac_fw4rZiDufp6KrZN-AdHweU-zlUqYkRd7CLU5P5Mg1"
+          webhook-uri: ${{ secrets.TEAMS_WEBHOOK_URL }}
           environment: "Production"
           timezone: "GMT"
-          custom-facts: |
-            - name: Service
-              value: ${{ inputs.service_friendly }}
+          card-layout-start: cozy
 
       - uses: actions/checkout@v2
       - uses: actions/checkout@v2
