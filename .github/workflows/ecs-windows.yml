@@ -52,10 +52,6 @@ jobs:
     runs-on: windows-2019
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
-        with:
-          repository: recipopdev/github-workflows
-          path: github-workflows
 
       - uses: dchourasia/ms-teams-notification@1.1
         if: ${{ inputs.notify_teams == true }}
@@ -66,6 +62,11 @@ jobs:
           timezone: "GMT"
           card-layout-start: cozy
           card-layout-exit: compact
+
+      - uses: actions/checkout@v4
+        with:
+          repository: recipopdev/github-workflows
+          path: github-workflows
       
       - name: Pre Script
         if: ${{ inputs.pre_script != '' }}
