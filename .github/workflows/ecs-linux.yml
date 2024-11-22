@@ -40,9 +40,6 @@ on:
       notify_teams:
         type: boolean
         default: false
-      friendly_service_name:
-        type: string
-        default: ""
     secrets:
       aws_key:
         required: true
@@ -79,14 +76,9 @@ jobs:
         run: sudo chown -R $USER:$USER /home/ubuntu/actions-runner/_work/$(echo "${{ github.repository }}" | sed "s|${{ github.repository_owner }}/||")
 
       - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
-        with:
-          repository: recipopdev/github-workflows
-          path: github-workflows
 
-      - name: Notify Teams
+      - uses: dchourasia/ms-teams-notification@1.1
         if: ${{ inputs.notify_teams == true }}
-        uses: dchourasia/ms-teams-notification@1.1
         with:
           github-token: ${{ github.token }}
           webhook-uri: ${{ env.TEAMS_WEBHOOK_URL }}
@@ -94,6 +86,12 @@ jobs:
           timezone: "GMT"
           card-layout-start: cozy
           card-layout-exit: compact
+          parent-job: "${{ inputs.service }}-prod"
+
+      - uses: actions/checkout@v4
+        with:
+          repository: recipopdev/github-workflows
+          path: github-workflows
 
       - uses: actions/setup-node@v3
         if: ${{ inputs.node_cache != '' }}
