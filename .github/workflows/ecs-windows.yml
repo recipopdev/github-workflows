@@ -23,6 +23,9 @@ on:
       notify_teams:
         type: boolean
         default: false
+      friendly_service_name:
+        type: string
+        default: ""
     secrets:
       aws_key:
         required: true
@@ -57,6 +60,7 @@ jobs:
           environment: "Production"
           timezone: "GMT"
           card-layout-start: cozy
+          job-name: ${{ inputs.friendly_service_name }}
 
       - uses: actions/checkout@v2
       - uses: actions/checkout@v2

@@ -40,6 +40,9 @@ on:
       notify_teams:
         type: boolean
         default: false
+      friendly_service_name:
+        type: string
+        default: ""
     secrets:
       aws_key:
         required: true
@@ -79,6 +82,7 @@ jobs:
           environment: "Production"
           timezone: "GMT"
           card-layout-start: cozy
+          job-name: ${{ inputs.friendly_service_name }}
 
       - name: Preparing working directory on self hosted runner
         if: ${{ inputs.self_hosted }}
