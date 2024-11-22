@@ -73,18 +73,6 @@ jobs:
   deploy-service:
     runs-on: ${{ (inputs.self_hosted && 'self-hosted') || 'ubuntu-20.04' }}
     steps:
-      - name: Notify Teams
-        if: ${{ inputs.notify_teams == true }}
-        uses: dchourasia/ms-teams-notification@1.1
-        with:
-          github-token: ${{ github.token }}
-          webhook-uri: ${{ env.TEAMS_WEBHOOK_URL }}
-          environment: "Production"
-          timezone: "GMT"
-          card-layout-start: cozy
-          card-layout-exit: compact
-          job-name: ${{ inputs.friendly_service_name }}
-
       - name: Preparing working directory on self hosted runner
         if: ${{ inputs.self_hosted }}
         id: prep
@@ -95,6 +83,17 @@ jobs:
         with:
           repository: recipopdev/github-workflows
           path: github-workflows
+
+      - name: Notify Teams
+        if: ${{ inputs.notify_teams == true }}
+        uses: dchourasia/ms-teams-notification@1.1
+        with:
+          github-token: ${{ github.token }}
+          webhook-uri: ${{ env.TEAMS_WEBHOOK_URL }}
+          environment: "Production"
+          timezone: "GMT"
+          card-layout-start: cozy
+          card-layout-exit: compact
 
       - uses: actions/setup-node@v3
         if: ${{ inputs.node_cache != '' }}

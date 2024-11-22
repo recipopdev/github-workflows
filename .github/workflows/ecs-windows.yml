@@ -51,9 +51,14 @@ jobs:
   deploy-service:
     runs-on: windows-2019
     steps:
-      - name: Notify Teams
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: recipopdev/github-workflows
+          path: github-workflows
+
+      - uses: dchourasia/ms-teams-notification@1.1
         if: ${{ inputs.notify_teams == true }}
-        uses: dchourasia/ms-teams-notification@1.1
         with:
           github-token: ${{ github.token }}
           webhook-uri: ${{ env.TEAMS_WEBHOOK_URL }}
@@ -61,12 +66,6 @@ jobs:
           timezone: "GMT"
           card-layout-start: cozy
           card-layout-exit: compact
-
-      - uses: actions/checkout@v2
-      - uses: actions/checkout@v2
-        with:
-          repository: recipopdev/github-workflows
-          path: github-workflows
       
       - name: Pre Script
         if: ${{ inputs.pre_script != '' }}
