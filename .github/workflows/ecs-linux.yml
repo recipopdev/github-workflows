@@ -47,6 +47,8 @@ on:
         required: true
       region:
         required: true
+      teams_webhook_url:
+        required: true
       sonar_token:
       api_test_secret_vars:
 
@@ -63,6 +65,7 @@ env:
   DATABASE_MIGRATION_DOCKERFILE: ${{ inputs.database_migration_dockerfile }}
   TF_VAR_commit_sha: ${{ github.sha }}${{ github.run_attempt }}
   TF_VAR_github_token: ${{ secrets.GITHUB_TOKEN }}
+  TEAMS_WEBHOOK_URL: ${{ secrets.teams_webhook_url }}
 jobs:
   deploy-service:
     runs-on: ${{ (inputs.self_hosted && 'self-hosted') || 'ubuntu-20.04' }}
@@ -72,7 +75,7 @@ jobs:
         uses: dchourasia/ms-teams-notification@1.1
         with:
           github-token: ${{ github.token }}
-          webhook-uri: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          webhook-uri: ${{ env.TEAMS_WEBHOOK_URL }}
           environment: "Production"
           timezone: "GMT"
           card-layout-start: cozy

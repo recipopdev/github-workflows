@@ -30,6 +30,8 @@ on:
         required: true
       region:
         required: true
+      teams_webhook_url:
+        required: true
       api_test_secret_vars:
 
 env: 
@@ -41,6 +43,7 @@ env:
   API_TEST_ENV_VARS: ${{ inputs.api_test_env_vars }}
   API_TEST_SECRET_VARS: ${{ secrets.api_test_secret_vars }}
   TF_VAR_commit_sha: ${{ github.sha }}${{ github.run_attempt }}
+  TEAMS_WEBHOOK_URL: ${{ secrets.teams_webhook_url }}
 jobs:
   deploy-service:
     runs-on: windows-2019
@@ -50,7 +53,7 @@ jobs:
         uses: dchourasia/ms-teams-notification@1.1
         with:
           github-token: ${{ github.token }}
-          webhook-uri: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          webhook-uri: ${{ env.TEAMS_WEBHOOK_URL }}
           environment: "Production"
           timezone: "GMT"
           card-layout-start: cozy
