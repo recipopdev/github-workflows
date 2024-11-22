@@ -37,12 +37,17 @@ on:
       skip_docker_scan:
         type: boolean
         default: false
+      notify_teams:
+        type: boolean
+        default: false
     secrets:
       aws_key:
         required: true
       aws_secret:
         required: true
       region:
+        required: true
+      teams_webhook_url:
         required: true
       sonar_token:
       api_test_secret_vars:
@@ -60,6 +65,7 @@ env:
   DATABASE_MIGRATION_DOCKERFILE: ${{ inputs.database_migration_dockerfile }}
   TF_VAR_commit_sha: ${{ github.sha }}${{ github.run_attempt }}
   TF_VAR_github_token: ${{ secrets.GITHUB_TOKEN }}
+  TEAMS_WEBHOOK_URL: ${{ secrets.teams_webhook_url }}
 jobs:
   deploy-service:
     runs-on: ${{ (inputs.self_hosted && 'self-hosted') || 'ubuntu-20.04' }}
@@ -70,6 +76,18 @@ jobs:
         run: sudo chown -R $USER:$USER /home/ubuntu/actions-runner/_work/$(echo "${{ github.repository }}" | sed "s|${{ github.repository_owner }}/||")
 
       - uses: actions/checkout@v4
+
+      - uses: dchourasia/ms-teams-notification@1.1
+        if: ${{ inputs.notify_teams == true }}
+        with:
+          github-token: ${{ github.token }}
+          webhook-uri: ${{ env.TEAMS_WEBHOOK_URL }}
+          environment: "Production"
+          timezone: "GMT"
+          card-layout-start: cozy
+          card-layout-exit: compact
+          parent-job: "${{ inputs.service }}-prod"
+
       - uses: actions/checkout@v4
         with:
           repository: recipopdev/github-workflows
