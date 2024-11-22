@@ -82,6 +82,7 @@ jobs:
           environment: "Production"
           timezone: "GMT"
           card-layout-start: cozy
+          card-layout-exit: compact
           job-name: ${{ inputs.friendly_service_name }}
 
       - name: Preparing working directory on self hosted runner

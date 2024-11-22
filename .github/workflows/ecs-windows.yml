@@ -60,7 +60,7 @@ jobs:
           environment: "Production"
           timezone: "GMT"
           card-layout-start: cozy
-          job-name: ${{ inputs.friendly_service_name }}
+          card-layout-exit: compact
 
       - uses: actions/checkout@v2
       - uses: actions/checkout@v2
