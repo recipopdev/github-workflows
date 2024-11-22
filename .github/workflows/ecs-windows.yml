@@ -68,11 +68,11 @@ jobs:
           repository: recipopdev/github-workflows
           path: github-workflows
       
-      - name: Pre Script
-        if: ${{ inputs.pre_script != '' }}
-        id: pre-script
-        run: powershell ${{ inputs.pre_script }}
-        working-directory: ${{ inputs.working_directory }}
+      # - name: Pre Script
+      #   if: ${{ inputs.pre_script != '' }}
+      #   id: pre-script
+      #   run: powershell ${{ inputs.pre_script }}
+      #   working-directory: ${{ inputs.working_directory }}
 
       - name: Copy deployment scripts
         id: deployment-scripts
@@ -84,96 +84,96 @@ jobs:
         run: pip3 install --user Jinja2 PyYAML boto3 packaging prometheus_client
         working-directory: ${{ inputs.working_directory }}\deploy\
 
-      - name: Report Running Pipeline
-        id: pipeline-reporting-running
-        run: python3 pipeline_reporting.py --service $env:DEPLOY_SERVICE --environment $env:DEPLOY_ACCOUNT --running
-        working-directory: ${{ inputs.working_directory }}\deploy\
+      # - name: Report Running Pipeline
+      #   id: pipeline-reporting-running
+      #   run: python3 pipeline_reporting.py --service $env:DEPLOY_SERVICE --environment $env:DEPLOY_ACCOUNT --running
+      #   working-directory: ${{ inputs.working_directory }}\deploy\
 
-      - name: Fetch version
-        id: fetch-version
-        run: |
-          python3 versioning.py --service $env:DEPLOY_SERVICE --fetch
-          if ($env:DEPLOY_ACCOUNT -eq "uat")
-          {
-            npm version patch
-          }
-          if ($env:DEPLOY_ACCOUNT -eq "production")
-          {
-            npm version minor
-          }
-        working-directory: ${{ inputs.working_directory }}\deploy\
+      # - name: Fetch version
+      #   id: fetch-version
+      #   run: |
+      #     python3 versioning.py --service $env:DEPLOY_SERVICE --fetch
+      #     if ($env:DEPLOY_ACCOUNT -eq "uat")
+      #     {
+      #       npm version patch
+      #     }
+      #     if ($env:DEPLOY_ACCOUNT -eq "production")
+      #     {
+      #       npm version minor
+      #     }
+      #   working-directory: ${{ inputs.working_directory }}\deploy\
 
-      - name: Generate ECR token
-        id: token
-        run: python3 ecr_authenticate.py --environment $env:DEPLOY_ACCOUNT
-        working-directory: ${{ inputs.working_directory }}\deploy\
+      # - name: Generate ECR token
+      #   id: token
+      #   run: python3 ecr_authenticate.py --environment $env:DEPLOY_ACCOUNT
+      #   working-directory: ${{ inputs.working_directory }}\deploy\
 
-      - name: Bootstrap terraform files
-        id: bootstrap
-        run: python3 bootstrap.py;
-        working-directory: ${{ inputs.working_directory }}\deploy\
+      # - name: Bootstrap terraform files
+      #   id: bootstrap
+      #   run: python3 bootstrap.py;
+      #   working-directory: ${{ inputs.working_directory }}\deploy\
 
-      - name: Prepare deployment files
-        id: prepare
-        run: |
-          copy ${{ inputs.working_directory }}\deploy\*.tf* ${{ inputs.working_directory }}\
-          copy ${{ inputs.working_directory }}\deploy\package.json ${{ inputs.working_directory }}\
+      # - name: Prepare deployment files
+      #   id: prepare
+      #   run: |
+      #     copy ${{ inputs.working_directory }}\deploy\*.tf* ${{ inputs.working_directory }}\
+      #     copy ${{ inputs.working_directory }}\deploy\package.json ${{ inputs.working_directory }}\
 
-      - uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_version: 1.1.4
-          terraform_wrapper: false
+      # - uses: hashicorp/setup-terraform@v1
+      #   with:
+      #     terraform_version: 1.1.4
+      #     terraform_wrapper: false
 
-      - name: Terraform fmt
-        id: fmt
-        run: terraform fmt -check -diff
-        working-directory: ${{ inputs.working_directory }}
+      # - name: Terraform fmt
+      #   id: fmt
+      #   run: terraform fmt -check -diff
+      #   working-directory: ${{ inputs.working_directory }}
 
-      - name: Terraform Init
-        id: init
-        run: terraform init -input=false
-        working-directory: ${{ inputs.working_directory }}
+      # - name: Terraform Init
+      #   id: init
+      #   run: terraform init -input=false
+      #   working-directory: ${{ inputs.working_directory }}
 
-      - name: Terraform Validate
-        id: validate
-        run: terraform validate -no-color
-        working-directory: ${{ inputs.working_directory }}
+      # - name: Terraform Validate
+      #   id: validate
+      #   run: terraform validate -no-color
+      #   working-directory: ${{ inputs.working_directory }}
 
-      - name: Select Workspace
-        id: workspace
-        run: |
-          if ($env:DEPLOY_ACCOUNT -eq "uat")
-          {
-            terraform workspace select uat
-          }
-          if ($env:DEPLOY_ACCOUNT -eq "production")
-          {
-            terraform workspace select prod
-          }
-        working-directory: ${{ inputs.working_directory }}
+      # - name: Select Workspace
+      #   id: workspace
+      #   run: |
+      #     if ($env:DEPLOY_ACCOUNT -eq "uat")
+      #     {
+      #       terraform workspace select uat
+      #     }
+      #     if ($env:DEPLOY_ACCOUNT -eq "production")
+      #     {
+      #       terraform workspace select prod
+      #     }
+      #   working-directory: ${{ inputs.working_directory }}
 
-      - name: Terraform Apply
-        id: apply
-        run: terraform apply -auto-approve -input=false
-        working-directory: ${{ inputs.working_directory }}
+      # - name: Terraform Apply
+      #   id: apply
+      #   run: terraform apply -auto-approve -input=false
+      #   working-directory: ${{ inputs.working_directory }}
 
-      - name: Commit version
-        id: commit-version
-        if: ${{ inputs.account != 'development' }}
-        run: |
-          python3 versioning.py --service $env:DEPLOY_SERVICE --save
-        working-directory: ${{ inputs.working_directory }}\deploy\
+      # - name: Commit version
+      #   id: commit-version
+      #   if: ${{ inputs.account != 'development' }}
+      #   run: |
+      #     python3 versioning.py --service $env:DEPLOY_SERVICE --save
+      #   working-directory: ${{ inputs.working_directory }}\deploy\
 
-      - name: Terraform Confirm
-        id: confirm
-        run: terraform plan -input=false -detailed-exitcode
-        working-directory: ${{ inputs.working_directory }}
+      # - name: Terraform Confirm
+      #   id: confirm
+      #   run: terraform plan -input=false -detailed-exitcode
+      #   working-directory: ${{ inputs.working_directory }}
 
-      - name: Track deployment rollout
-        if: inputs.track_deployment == true
-        id: track-rollout
-        run: python3 track_deployment.py --service $env:DEPLOY_SERVICE --environment $env:DEPLOY_ACCOUNT
-        working-directory: ${{ inputs.working_directory }}\deploy\
+      # - name: Track deployment rollout
+      #   if: inputs.track_deployment == true
+      #   id: track-rollout
+      #   run: python3 track_deployment.py --service $env:DEPLOY_SERVICE --environment $env:DEPLOY_ACCOUNT
+      #   working-directory: ${{ inputs.working_directory }}\deploy\
 
       - name: Combining API Test Environment Variables
         if: |
