@@ -62,6 +62,7 @@ jobs:
           timezone: "GMT"
           card-layout-start: cozy
           card-layout-exit: compact
+          parent-job: campaign-builder-dev
 
       - uses: actions/checkout@v4
         with:
