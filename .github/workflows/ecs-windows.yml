@@ -31,7 +31,7 @@ on:
       region:
         required: true
       teams_webhook_url:
-        required: true
+        required: false
       api_test_secret_vars:
 
 env: 
