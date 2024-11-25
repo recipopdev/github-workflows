@@ -48,7 +48,7 @@ on:
       region:
         required: true
       teams_webhook_url:
-        required: true
+        required: false
       sonar_token:
       api_test_secret_vars:
 
