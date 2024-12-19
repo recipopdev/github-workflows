@@ -48,6 +48,7 @@ def retrieve_image_scan_status(ecr:boto3.client, service:str) -> str:
   image_details.sort(key = lambda x:x["imagePushedAt"], reverse=True)
   if "imageScanStatus" in image_details[0]:
     if "status" in image_details[0]["imageScanStatus"]:
+      logging.info(image_details)
       return image_details[0]["imageScanStatus"]["status"]
   return "ERROR"
 
