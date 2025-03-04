@@ -28,7 +28,7 @@ env:
   TF_VAR_commit_sha: ${{ github.sha }}${{ github.run_attempt }}
 jobs:
   pr-checks:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions/checkout@v2
