@@ -68,7 +68,7 @@ env:
   TEAMS_WEBHOOK_URL: ${{ secrets.teams_webhook_url }}
 jobs:
   deploy-service:
-    runs-on: ${{ (inputs.self_hosted && 'self-hosted') || 'ubuntu-20.04' }}
+    runs-on: ${{ (inputs.self_hosted && 'self-hosted') || 'ubuntu-24.04' }}
     steps:
       - name: Preparing working directory on self hosted runner
         if: ${{ inputs.self_hosted }}
